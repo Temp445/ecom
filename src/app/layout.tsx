@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import {Rubik} from "next/font/google";
+import {Rubik,Poppins} from "next/font/google";
 import "./globals.css";
 
 
@@ -8,6 +8,11 @@ const rubik = Rubik({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
 });
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
+  weight: ["400","500", "700" ]
+})
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -22,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${rubik.variable} antialiased`}
+        className={`${rubik.variable} ${poppins.variable} antialiased`}
       >
         {children}
       </body>
