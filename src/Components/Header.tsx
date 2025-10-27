@@ -7,7 +7,7 @@ import Link from "next/link";
 const Header = () => {
   return (
     <header className="w-full shadow-md bg-white border border-gray-200">
-      <div className="container mx-auto px-4 xl:px-10 py-0.5 flex items-center justify-between">
+      <div className="container mx-auto px-4 xl:px-6 2xl:px-10 py-0.5 flex items-center justify-between">
         <div className="flex gap-3 text-xs" >
       <Image src={Mail} alt=""  width={16} height={16} />  hydraulic@gmail.com
         </div>

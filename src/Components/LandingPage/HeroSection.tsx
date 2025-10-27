@@ -37,7 +37,6 @@ const slides = [
 const HeroSection = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Auto-slide every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -46,7 +45,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <div className="relative w-full h-[80vh] 2xl:h-[500px] container mx-auto">
+    <div className="relative w-full h-[80vh] 2xl:h-[600px] container mx-auto">
       <AnimatePresence>
         {slides.map((slide, index) =>
           index === currentSlide ? (
@@ -56,7 +55,7 @@ const HeroSection = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1 ,ease: "easeInOut"}}
-              className="absolute inset-0 w-full h-[500px] flex items-center justify-center bg-[#F4F4F4]"
+              className="absolute inset-0 w-full h-[500px] 2xl:h-[600px] flex items-center justify-center bg-[#F4F4F4]"
             >
               <img
                 src={slide.img}
@@ -84,7 +83,7 @@ const HeroSection = () => {
           <button
             key={idx}
             onClick={() => setCurrentSlide(idx)}
-            className={`w-1.5 h-4 border rounded transition ${
+            className={`w-1.5 h-4 border rounded transition duration-500 ${
               idx === currentSlide ? "bg-gray-900 h-8" : "bg-white"
             }`}
           ></button>

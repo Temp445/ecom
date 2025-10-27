@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ShoppingCart, Menu, X, Search, User, Bell } from 'lucide-react';
+import { ShoppingCart, Menu, X, Search, User, CircleUserRound } from 'lucide-react';
 import Logo from "@/assets/images/AceLogo.png"
 import Image from 'next/image';
+import UserMenu from './Button/UserMenu';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,14 +21,16 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white sticky top-0 z-50 border-b border-gray-100">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-0 xl:px-6">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-2 2xl:px-6">
         <div className="flex justify-between items-center py-0.5">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
-            <div className="   flex items-center justify-center">
-              <Image src={Logo} alt="logo" className='' width={42} height={42} />
+          <Link href="/" className="flex flex-col items-center space-x-2 flex-shrink-0">
+            <div className="   flex items-end gap-1 justify-center">
+              <Image src={Logo} alt="logo" className='' width={40} height={40} />
+            <span className="font-medium text-2xl font-sans text-gray-900 hidden sm:inline">ACE </span>
+
             </div>
-            <span className="font-semibold text-xl text-gray-900 hidden sm:inline">ACE Hydraulic</span>
+            <span className='ml-3 -mt-1.5 font-medium uppercase text-sm'>Hydraulic</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -44,12 +47,10 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Right Side */}
-          <div className="flex items-center space-x-3 lg:space-x-5">
-            {/* Search - Desktop */}
+          <div className="flex items-center space-x-3 gap-3 lg:space-x-5">
             <div className="hidden md:flex items-center">
-              <div className="flex items-center bg-gray-50 rounded-full px-4 py-2 border border-gray-200 hover:border-gray-900 transition-colors focus-within:ring-2 focus-within:ring-blue-200">
-                <Search className="w-4 h-4 text-gray-400" />
+              <div className="flex items-center bg-gray-50 rounded-full px-4 py-2 border border-gray-200 hover:border-gray-900 transition-colors">
+                <Search className="w-4 h-4 text-gray-600" />
                 <input
                   type="text"
                   placeholder="Search..."
@@ -58,13 +59,13 @@ export default function Navbar() {
               </div>
             </div>
 
-            <Link href="/account" className="hidden sm:flex p-2.5 text-gray-700 hover:bg-gray-200 hover:text-gray-900 rounded-full transition-colors">
-              <User className="w-6 h-6" />
-            </Link>
+           <div>
+            <UserMenu/>
+           </div>
 
-            <Link href="/cart" className="relative  text-gray-700  hover:text-gray-900 rounded-full transition-colors group">
+            <Link href="/cart" className="relative  text-gray-800  hover:text-gray-900 rounded-full transition-colors group">
               <ShoppingCart className="w-6 h-6 transition-transform" />
-              <span className="absolute -top-1 -right-1 bg-gray-800 text-white text-xs font-bold rounded-full px-1 h-fit flex items-center justify-center shadow-lg">
+              <span className="absolute -top-1.5 -right-1.5 bg-gray-800 text-white text-xs font-bold rounded-full px-1 h-fit flex items-center justify-center shadow-lg">
                 0
               </span>
             </Link>

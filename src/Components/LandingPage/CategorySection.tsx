@@ -2,64 +2,55 @@
 
 import React from "react";
 import Image from "next/image";
-import hydraulic from "@/assets/images/product1.png"
+import hydraulic from "@/assets/Category/single_acting_hydraulic.png"
+import double from "@/assets/Category/double_acting_hydraulic.png"
+import tie_rod from "@/assets/Category/tie_rod.png"
+import welded from "@/assets/Category/Welded.png"
+import telescopic from "@/assets/Category/telescopic.png"
 
 const categories = [
   {
-    name: "Hydraulic Cylinders",
+    name: "Single Acting Hydraulic Cylinder",
     image: hydraulic,
     link: "/products/cylinders",
   },
   {
-    name: "Hydraulic Pumps",
-    image: hydraulic,
+    name: "Double Acting Hydraulic Cylinder",
+    image: double,
     link: "/products/pumps",
   },
   {
-    name: "Hydraulic Valves",
-    image: hydraulic,
+    name: "Tie Rod Hydraulic Cylinder",
+    image: tie_rod,
     link: "/products/valves",
   },
   {
-    name: "Hydraulic Accessories",
-    image: hydraulic,
+    name: "Telescopic Hydraulic Cylinder",
+    image: telescopic,
     link: "/products/accessories",
   },
   {
-    name: "Power Units",
-    image: hydraulic,
+    name: "Welded Body Hydraulic Cylinder",
+    image: welded,
     link: "/products/power-units",
-  },
-  {
-    name: "Manifolds",
-    image: hydraulic,
-    link: "/products/manifolds",
-  },
+  }
 ];
 
 export default function CategorySection() {
   return (
-    <section className="py-10 bg-white">
-      <div className="max-w-7xl mx-auto">
+    <section className="py-10 bg-gray-900">
+      <div className="max-w-7xl mx-auto px-4 2xl:px-0">
         
-        {/* Header */}
-        {/* <div className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Our Category
-          </h2>
-        </div> */}
 
-        {/* Grid Layout */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {categories.map((cat, idx) => (
             <a
               href={cat.link}
               key={idx}
               className="group flex flex-col items-center"
             >
-              {/* Image Container */}
-              <div className="relative w-full aspect-square bg-gray-50 border-2 border-gray-200 group-hover:border-black rounded transition-all duration-300 flex items-center justify-center mb-4 overflow-hidden">
-                <div className="relative w-2/4 h-2/4 transform group-hover:scale-110 transition-transform duration-500">
+              <div className="relative w-full aspect-square bg-gray-50 border-2 border-gray-200  rounded-xl transition-all duration-300 flex items-center justify-center mb-4 overflow-hidden">
+                <div className="relative w-3/4 h-3/4 transform group-hover:scale-110 transition-transform duration-500">
                   <Image
                     src={cat.image}
                     alt={cat.name}
@@ -67,12 +58,9 @@ export default function CategorySection() {
                   />
                 </div>
                 
-                {/* Hover Accent */}
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-black transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
               </div>
 
-              {/* Title */}
-              <h3 className="text-sm font-semibold text-gray-900 text-center group-hover:text-black transition-colors duration-300 leading-tight">
+              <h3 className="text-sm font-semibold text-white text-center transition-colors duration-300 leading-tight">
                 {cat.name}
               </h3>
             </a>

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Star } from "lucide-react";
+import { Star, Quote } from "lucide-react";
 
 export default function Testimonials() {
   const testimonials = [
@@ -11,6 +11,7 @@ export default function Testimonials() {
       review:
         "Their hydraulic cylinders are top-notch. Exceptional durability and performance for our heavy-duty equipment!",
       rating: 5,
+      role: "Operations Manager"
     },
     {
       name: "Priya Verma",
@@ -18,6 +19,7 @@ export default function Testimonials() {
       review:
         "Excellent service and custom solutions. Delivery was on time, and the team was very responsive.",
       rating: 4,
+      role: "Procurement Head"
     },
     {
       name: "Suresh Kumar",
@@ -25,30 +27,73 @@ export default function Testimonials() {
       review:
         "High precision and long-lasting products. Definitely our go-to supplier for all hydraulic components.",
       rating: 5,
+      role: "Technical Director"
     },
   ];
 
+  
+
   return (
-    <section className="text-center px-6">
-      <h2 className="text-3xl font-bold mb-6">What Our Clients Say</h2>
-      <div className="flex overflow-x-auto gap-6 snap-x justify-center">
+    <section className="relative px-6 max-w-7xl mx-auto py-10 overflow-hidden">
+   
+      
+      {/* Header */}
+      <motion.div
+        className="text-center mb-16"
+      >
+        <span className="text- font-semibold text-sm uppercase tracking-wider mb-2 block">
+          Testimonials
+        </span>
+        <h2 className="text-4xl font-semibold mb-4 text-gray-900">
+          What Our Clients Say
+        </h2>
+        <p className="text-gray-600 max-w-2xl mx-auto">
+          Trusted by industry leaders for precision hydraulic solutions
+        </p>
+      </motion.div>
+
+      <motion.div
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+      >
         {testimonials.map((t, i) => (
           <motion.div
             key={i}
-            whileHover={{ scale: 1.05 }}
-            className="min-w-[300px] bg-white shadow-md rounded-2xl p-6 snap-center"
+            className="relative bg-white rounded-xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-400 group"
           >
-            <div className="flex justify-center mb-3">
-              {[...Array(t.rating)].map((_, i) => (
-                <Star key={i} className="text-yellow-500 w-5 h-5" />
+            <div className="absolute -top-4 -left-4 bg-white rounded-2xl p-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <Quote className="text-gray-900 w-6 h-6" fill="currentColor" />
+            </div>
+
+            <div className="flex gap-1 mb-4 mt-4">
+              {[...Array(5)].map((_, idx) => (
+                <Star
+                  key={idx}
+                  className={`w-5 h-5 ${
+                    idx < t.rating 
+                      ? "text-yellow-400 fill-yellow-400" 
+                      : "text-gray-300"
+                  }`}
+                />
               ))}
             </div>
-            <p className="italic text-gray-700 mb-3">"{t.review}"</p>
-            <h4 className="font-semibold">{t.name}</h4>
-            <p className="text-sm text-gray-500">{t.company}</p>
+
+            {/* Review */}
+            <p className="text-gray-700 leading-relaxed mb-6 text-base">
+              "{t.review}"
+            </p>
+
+            <div className="flex items-center gap-4 pt-4 border-t border-gray-100">
+              <div className="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                {t.name.charAt(0)}
+              </div>
+              <div>
+                <h4 className="font-bold text-gray-900">{t.name}</h4>
+                <p className="text-sm text-gray-500">{t.role}</p>
+              </div>
+            </div>
           </motion.div>
         ))}
-      </div>
+      </motion.div>
     </section>
   );
 }

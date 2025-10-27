@@ -30,7 +30,7 @@ export default function FeaturesSection() {
   ];
 
   return (
-    <div className="w-full py-12 px-4">
+    <div className="w-full py-12 2xl:py-5 px-4">
       <div className="container mx-auto">
         <div className="bg-white rounded-lg  py-10 px-4 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ">

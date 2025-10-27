@@ -3,7 +3,8 @@ import About from '@/Components/LandingPage/About'
 import BlogSection from '@/Components/LandingPage/BlogSection'
 import CategorySection from '@/Components/LandingPage/CategorySection'
 import HeroSection from '@/Components/LandingPage/HeroSection'
-import IndustryApplications from '@/Components/LandingPage/IndustryApplications'
+import IndustryUsage from '@/Components/LandingPage/IndustryUsage'
+import NewProduct from '@/Components/LandingPage/NewProduct'
 import Offer from '@/Components/LandingPage/Offer'
 import PopularProducts from '@/Components/LandingPage/PopularProducts'
 import RequestQuote from '@/Components/LandingPage/RequestQuote'
@@ -15,18 +16,20 @@ import React from 'react'
 const page = () => {
   return (
     <div>
-      <Header/>
-      <Navbar/>
+      {/* <Header/>
+      <Navbar/> */}
       <HeroSection/>
       <FeatureList/>
       <CategorySection/>
-      <PopularProducts/>
-      <About/>
+      <NewProduct/>
       <Offer/>
-      <IndustryApplications/>
-      <RequestQuote/>
-      <BlogSection/>
+
+      <PopularProducts/>
+      {/* <RequestQuote/> */}
+      <About/>
+      <IndustryUsage/>
       <Testimonials/>
+      <BlogSection/>
     </div>
   )
 }

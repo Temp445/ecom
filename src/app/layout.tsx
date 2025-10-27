@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import {Rubik,Poppins} from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/context/AuthProvider";
+import Header from "@/Components/Header";
+import Navbar from "@/Components/Navbar";
 
 
 const rubik = Rubik({
@@ -29,7 +32,11 @@ export default function RootLayout({
       <body
         className={`${rubik.variable} ${poppins.variable} antialiased`}
       >
+         <AuthProvider>
+         <Header/>
+        <Navbar/>
         {children}
+        </AuthProvider>
       </body>
     </html>
   );
