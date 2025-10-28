@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import {Rubik,Poppins} from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthProvider";
-import Header from "@/Components/Header";
-import Navbar from "@/Components/Navbar";
+import Header from "@/Components/Common/Header";
+import Navbar from "@/Components/Common/Navbar";
 
 
 const rubik = Rubik({

@@ -1,47 +1,86 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CircleUserRound, LogOut, LogIn, UserPlus, User, Clock } from "lucide-react";
+import {
+  CircleUserRound,
+  LogOut,
+  LogIn,
+  UserPlus,
+  Clock,
+  ChevronUp,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const UserMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [firstName, setFirstName] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-useEffect(() => {
-  const loadUser = () => {
-    const token = localStorage.getItem("token");
-    const firstName = localStorage.getItem("firstName");
+  // ✅ Load user from localStorage on mount
+  useEffect(() => {
+    const loadUser = () => {
+      const token = localStorage.getItem("token");
+      const storedUserId = localStorage.getItem("userId");
 
-    if (token) {
-      setIsLoggedIn(true);
-      setFirstName(firstName);
-    } else {
-      setIsLoggedIn(false);
-      setFirstName(null);
-    }
-  };
+      if (token && storedUserId) {
+        setIsLoggedIn(true);
+        setUserId(storedUserId);
+      } else {
+        setIsLoggedIn(false);
+        setUserId(null);
+        setUser(null);
+      }
+    };
 
-  loadUser(); 
+    loadUser();
 
-  window.addEventListener("userLogin", loadUser);
-  window.addEventListener("userLogout", loadUser);
+    // Listen for login/logout events across app
+    window.addEventListener("userLogin", loadUser);
+    window.addEventListener("userLogout", loadUser);
 
-  return () => {
-    window.removeEventListener("userLogin", loadUser);
-    window.removeEventListener("userLogout", loadUser);
-  };
-}, []);
+    return () => {
+      window.removeEventListener("userLogin", loadUser);
+      window.removeEventListener("userLogout", loadUser);
+    };
+  }, []);
 
+  // ✅ Fetch user data from API
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!userId) return;
 
+      try {
+        const res = await fetch(`/api/auth/users/${userId}`);
+        const data = await res.json();
+
+        if (data.success && data.data) {
+          setUser(data.data);
+          setError(null);
+        } else {
+          setError("User not found");
+          setUser(null);
+        }
+      } catch (err) {
+        console.error("Error fetching user:", err);
+        setError("Failed to load user profile.");
+      }
+    };
+
+    fetchUser();
+  }, [userId]);
+
+  // ✅ Handle logout
   const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("firstName");
+    localStorage.removeItem("userId");
     setIsLoggedIn(false);
-    setFirstName(null);
+    setUserId(null);
+    setUser(null);
+    window.dispatchEvent(new Event("userLogout"));
     router.push("/login");
   };
 
@@ -51,42 +90,55 @@ useEffect(() => {
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
+      {/* Profile button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="hidden sm:flex items-center justify-center text-gray-800 hover:bg-gray-200 rounded-full p-2 transition"
+        className="hidden sm:flex items-center gap-2 justify-center text-gray-800 rounded py-2 px-4 transition group"
       >
-          {isLoggedIn ? 
-        <CircleUserRound className="w-7 h-7 text-emerald-600" /> :  <CircleUserRound className="w-7 h-7" />
-          }
+        {isLoggedIn ? (
+          <div className="flex gap-2 items-center">
+            <CircleUserRound className="w-6 h-6" />
+            <span>{user?.firstName || "User"}</span>
+            <span
+              className={`transition-transform duration-300 ${
+                isOpen ? "rotate-180" : "group-hover:rotate-180"
+              }`}
+            >
+              <ChevronUp className="w-4 h-5" />
+            </span>
+          </div>
+        ) : (
+          <Link href="/login" className="flex gap-2 items-center">
+            <CircleUserRound className="w-6 h-6" /> Login
+            <ChevronUp className="w-4 h-5 group-hover:rotate-180 transition-transform duration-300" />
+          </Link>
+        )}
       </button>
 
+      {/* Dropdown menu */}
       {isOpen && (
-        <div className="absolute -right-10 w-40 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50">
+        <div className="absolute -right-10 w-44 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50">
           {isLoggedIn ? (
             <>
-              <div className="px-4 py-2 border-b border-gray-300 text-sm font-semibold text-gray-800">
-                Hello, {firstName?.split(" ")[0] || "User"}
-              </div>
-
               <Link
-                href="/profile"
-                className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100"
+                href={`/user-profile/${userId}`}
+                className="flex items-center px-4 py-2 text-gray-700 text-sm hover:bg-gray-100"
               >
-                <User className="w-4 h-4 mr-2" /> Profile
+                <CircleUserRound className="w-4 h-4 mr-2" /> My Profile
               </Link>
 
               <Link
                 href="/orders"
-                className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100"
+                className="flex items-center px-4 py-2 text-gray-700 text-sm hover:bg-gray-100"
               >
-                <Clock className="w-4 h-4 mr-2" /> Order 
+                <Clock className="w-4 h-4 mr-2" /> Orders
               </Link>
 
               <div className="border-t border-gray-100 my-1" />
 
               <button
                 onClick={handleLogout}
-                className="w-full text-left flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100"
+                className="w-full text-left flex items-center px-4 py-2 text-gray-700 text-sm hover:bg-gray-100"
               >
                 <LogOut className="w-4 h-4 mr-2" /> Logout
               </button>
@@ -95,14 +147,14 @@ useEffect(() => {
             <>
               <Link
                 href="/register"
-                className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100"
+                className="flex items-center px-4 py-2 text-gray-700 text-sm hover:bg-gray-100"
               >
                 <UserPlus className="w-4 h-4 mr-2" /> Sign Up
               </Link>
 
               <Link
                 href="/login"
-                className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100"
+                className="flex items-center px-4 py-2 text-gray-700 text-sm hover:bg-gray-100"
               >
                 <LogIn className="w-4 h-4 mr-2" /> Login
               </Link>

@@ -4,6 +4,9 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import axios from 'axios';
 
 interface User {
+  _id: string;
+  firstName: string;
+  email: string;
   role: string;
   [key: string]: any;
 }
@@ -12,82 +15,50 @@ interface AuthContextType {
   user: User | null;
   isAdmin: boolean;
   loading: boolean;
-  login: (formData: Record<string, any>) => Promise<{ success: boolean; user?: User; error?: string }>;
-  checkIsAdmin: () => boolean;
+  setUser: (user: User | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export function AuthProvider({ children }: AuthProviderProps) {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const restoreUser = () => {
       const token = localStorage.getItem('token');
-      const role = localStorage.getItem('role');
-
-      if (token && role) {
-        try {
-          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          setUser({ role });
-          setIsAdmin(role === 'ADMIN');
-        } catch (error) {
-          console.error('Auth verification failed:', error);
-          localStorage.removeItem('token');
-          localStorage.removeItem('role');
-          setUser(null);
-          setIsAdmin(false);
-        }
+      const storedUser = localStorage.getItem('user');
+      if (token && storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        setIsAdmin(parsedUser.role === 'admin');
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      } else {
+        setUser(null);
+        setIsAdmin(false);
       }
-
       setLoading(false);
     };
 
-    checkAuth();
+    restoreUser();
+    window.addEventListener('userLogin', restoreUser);
+    window.addEventListener('userLogout', restoreUser);
+
+    return () => {
+      window.removeEventListener('userLogin', restoreUser);
+      window.removeEventListener('userLogout', restoreUser);
+    };
   }, []);
 
-  const login = async (formData: Record<string, any>) => {
-    try {
-      const response = await axios.post(`/api/login`, formData);
-      const { token, user } = response.data;
-
-      localStorage.setItem('token', token);
-      localStorage.setItem('role', user.role);
-
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
-      setUser(user);
-      setIsAdmin(user.role === 'ADMIN');
-
-      return { success: true, user };
-    } catch (error: any) {
-      console.error('Login failed:', error);
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Invalid email or password'
-      };
-    }
-  };
-
-  const checkIsAdmin = () => isAdmin;
-
   return (
-    <AuthContext.Provider
-      value={{ user, isAdmin, loading, login, checkIsAdmin }}
-    >
+    <AuthContext.Provider value={{ user, isAdmin, loading, setUser }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export const useAuth = (): AuthContextType => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;

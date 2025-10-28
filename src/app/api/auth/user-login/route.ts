@@ -39,14 +39,16 @@ export async function POST(req: NextRequest) {
 
     const token = generateToken(user._id);
 
-    return NextResponse.json(
-      {
+    return NextResponse.json({
+     success: true,
+     token,
+     user:{
         _id: user._id,
         firstName: user.firstName,
         email: user.email,
         role: user.role,
-        token,
-      },
+      }
+    },
       { status: 200 }
     );
   } catch (err: any) {
