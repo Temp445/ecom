@@ -86,7 +86,7 @@ export async function PUT(
         stream.end(buffer);
       });
 
-      category.CatImage = uploadedImage.public_id; 
+      category.CatImage = uploadedImage.secure_url; 
     }
 
     await category.save();

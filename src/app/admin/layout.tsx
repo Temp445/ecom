@@ -1,17 +1,20 @@
-import React from 'react'
-import ProductedRoute from '@/Components/Common/ProductedRoute';
+import React from "react";
+import ProductedRoute from "@/Components/Common/ProductedRoute";
+import Sidebar from "@/Components/Common/Sidebar";
 
-const Admin = ({  children,
+const Admin = ({
+  children,
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
   return (
-    <div>
-        <ProductedRoute>
-        {children}
-        </ProductedRoute>
+    <div className="flex">
+      <Sidebar />
+      <div className="flex-1">
+        <ProductedRoute>{children}</ProductedRoute>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Admin
+export default Admin;

@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
-import { Loader2, Save, Image as ImageIcon, ArrowLeft } from "lucide-react";
+import { Loader2, Save, Image as ImageIcon, X, ArrowLeft } from "lucide-react";
+import toast from "react-hot-toast";
 
 const CategoryEditPage = () => {
   const { id } = useParams();
@@ -14,25 +15,20 @@ const CategoryEditPage = () => {
     CatImage: null as File | null,
   });
   const [preview, setPreview] = useState<string | null>(null);
-  const [existingImage, setExistingImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  // Fetch existing category
   useEffect(() => {
     const fetchCategory = async () => {
       try {
-        setFetching(true);
-        const res = await axios.get(`/api/category/${id}`);
-        const category = res.data.data;
-        setFormData({ Name: category.Name, CatImage: null });
-        setExistingImage(category.CatImage);
-      } catch (err: any) {
-        setMessage({
-          type: "error",
-          text: err.response?.data?.message || "Failed to fetch category details.",
+        const { data } = await axios.get(`/api/category/${id}`);
+        setFormData({
+          Name: data.data.Name,
+          CatImage: null,
         });
+        setPreview(data.data.CatImage);
+      } catch (err) {
+        toast.error("Failed to load category data.");
       } finally {
         setFetching(false);
       }
@@ -40,7 +36,6 @@ const CategoryEditPage = () => {
     fetchCategory();
   }, [id]);
 
-  // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.name === "CatImage" && e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -51,39 +46,32 @@ const CategoryEditPage = () => {
     }
   };
 
-  // Submit update
+  const removeImage = () => {
+    setFormData({ ...formData, CatImage: null });
+    setPreview(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.Name) {
-      setMessage({ type: "error", text: "Category name is required." });
+    if (!formData.Name.trim()) {
+      toast.error("Please provide a category name.");
       return;
     }
 
     try {
       setLoading(true);
-      setMessage(null);
-
       const data = new FormData();
       data.append("Name", formData.Name);
       if (formData.CatImage) {
         data.append("CatImage", formData.CatImage);
       }
 
-      const res = await axios.put(`/api/category/${id}`, data);
-      setMessage({ type: "success", text: res.data.message || "Category updated successfully!" });
-
-      // Refresh displayed data
-      setFormData({ Name: formData.Name, CatImage: null });
-      setPreview(null);
-      if (res.data.data.CatImage) {
-        setExistingImage(res.data.data.CatImage);
-      }
+      await axios.put(`/api/category/${id}`, data);
+      toast.success("Category updated successfully!");
+      router.push("/admin/category");
     } catch (err: any) {
-      setMessage({
-        type: "error",
-        text: err.response?.data?.message || "Failed to update category.",
-      });
+      toast.error(err.response?.data?.message || "Failed to update category.");
     } finally {
       setLoading(false);
     }
@@ -91,68 +79,50 @@ const CategoryEditPage = () => {
 
   if (fetching) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-600">
-        <Loader2 className="animate-spin mr-2" /> Loading category details...
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <Loader2 className="animate-spin text-gray-400" size={32} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-10">
-      <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">Edit Category</h1>
+    <div className="min-h-screen flex items-center justify-center bg-white/50 py-12 px-4">
+      <div className="bg-white shadow-2xl rounded-3xl p-8 w-full max-w-lg border border-gray-100">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-semibold text-gray-800 mb-1">Edit Category</h1>
+            <p className="text-gray-500 text-sm">Update name or image of the category</p>
+          </div>
           <button
             onClick={() => router.back()}
-            className="text-gray-500 hover:text-gray-700 flex items-center text-sm"
+            className="flex items-center text-gray-500 hover:text-gray-800 transition"
           >
-            <ArrowLeft className="w-4 h-4 mr-1" /> Back
+            <ArrowLeft size={20} className="mr-1" /> Back
           </button>
         </div>
 
-        {message && (
-          <div
-            className={`p-3 rounded-md mb-4 text-center ${
-              message.type === "success"
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
-            }`}
-          >
-            {message.text}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Category Name */}
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block font-medium mb-1">Category Name</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Category Name
+            </label>
             <input
               type="text"
               name="Name"
               value={formData.Name}
               onChange={handleChange}
-              className="w-full border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 outline-none"
-              placeholder="Enter category name"
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-1 outline-none transition-all duration-200 text-gray-800 placeholder-gray-400"
+              placeholder=""
             />
           </div>
 
-          {/* Current Image */}
-          {existingImage && !preview && (
-            <div>
-              <p className="text-sm text-gray-600 mb-2">Current Image:</p>
-              <img
-                src={existingImage}
-                alt="Existing Category"
-                className="w-24 h-24 rounded-lg object-cover border"
-              />
-            </div>
-          )}
-
-          {/* Upload New Image */}
           <div>
-            <label className="block font-medium mb-1">Change Image</label>
-            <div className="flex items-center gap-3">
-              <label className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Category Image
+            </label>
+
+            {!preview ? (
+              <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-8 cursor-pointer hover:border-gray-500 hover:bg-blue-50 transition-all duration-200 group">
                 <input
                   type="file"
                   name="CatImage"
@@ -160,35 +130,48 @@ const CategoryEditPage = () => {
                   className="hidden"
                   onChange={handleChange}
                 />
-                <ImageIcon className="w-8 h-8 text-gray-500 mb-1" />
-                <span className="text-sm text-gray-600">
-                  {formData.CatImage ? formData.CatImage.name : "Upload new image"}
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-gray-100 transition-colors">
+                  <ImageIcon className="w-8 h-8 text-gray-400 group-hover:text-gray-900 transition-colors" />
+                </div>
+                <span className="text-sm font-medium text-gray-600 mb-1">
+                  Click to upload new image
                 </span>
               </label>
-
-              {preview && (
+            ) : (
+              <div className="relative rounded-xl overflow-hidden border-2 border-gray-200 group">
                 <img
                   src={preview}
                   alt="Preview"
-                  className="w-16 h-16 object-cover rounded-lg border"
+                  className="w-full h-48 object-cover"
                 />
-              )}
-            </div>
+                <div className="absolute inset-0 group-hover:bg-black/30 transition-all duration-200 flex items-center justify-center">
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white text-red-600 rounded-full p-2 hover:bg-red-50"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+               
+              </div>
+            )}
           </div>
 
-          {/* Save Button */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg flex items-center justify-center hover:bg-blue-700 transition disabled:opacity-70"
+            className="w-full bg-blue-700 text-white py-3.5 rounded-xl flex items-center justify-center transition-all duration-200 font-semibold shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
           >
             {loading ? (
               <>
-                <Loader2 className="animate-spin mr-2 w-5 h-5" /> Updating...
+                <Loader2 className="animate-spin mr-2 w-5 h-5" />
+                Saving...
               </>
             ) : (
               <>
-                <Save className="mr-2 w-5 h-5" /> Save Changes
+                <Save className="mr-2 w-5 h-5" />
+                Save Changes
               </>
             )}
           </button>

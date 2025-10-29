@@ -3,35 +3,35 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+
 import {
   Plus,
   Edit3,
   Trash2,
   Loader2,
   Image as ImageIcon,
+  Search,
 } from "lucide-react";
 
 const CategoryPage = () => {
-  const router = useRouter();
+
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(
-    null
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredCategories = categories.filter((cat) =>
+    cat.Name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Fetch categories
   const fetchCategories = async () => {
     try {
       setLoading(true);
       const res = await axios.get("/api/category");
-      setCategories(res.data.data);
+      setCategories(res.data.data || []);
     } catch (err: any) {
-      setMessage({
-        type: "error",
-        text: err.response?.data?.message || "Failed to load categories",
-      });
+      toast.error(err.response?.data?.message || "Failed to load categories")
     } finally {
       setLoading(false);
     }
@@ -41,65 +41,86 @@ const CategoryPage = () => {
     fetchCategories();
   }, []);
 
-  // Delete category
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this category?")) return;
     try {
       setDeletingId(id);
       await axios.delete(`/api/category/${id}`);
-      setMessage({ type: "success", text: "Category deleted successfully!" });
+      toast.success("Category deleted successfully!")
       setCategories((prev) => prev.filter((cat) => cat._id !== id));
     } catch (err: any) {
-      setMessage({
-        type: "error",
-        text: err.response?.data?.message || "Failed to delete category.",
-      });
+      toast.error(err.response?.data?.message || "Failed to delete category.")
     } finally {
       setDeletingId(null);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold text-gray-800">Categories</h1>
-          <Link
-            href="/admin/category-upload"
-            className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-          >
-            <Plus className="w-5 h-5 mr-1" /> Add Category
-          </Link>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 sm:p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="bg-white shadow-xl rounded-3xl p-6 sm:p-8 mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <div className="leading-none ">
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">Product <span className="text-gray-400">Categories</span> </h1>
+            </div>
+            <Link
+              href="/admin/category/upload"
+              className="flex items-center bg-gray-900 hover:bg-blue-600 text-white px-5 py-3 rounded-xl  transition-all duration-200 shadow-lg hover:shadow-xl font-medium transform hover:scale-105"
+            >
+              <Plus className="w-5 h-5 mr-2" /> Add Category
+            </Link>
+          </div>
+
+          <div className="relative w-full sm:w-96">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search categories..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-1 outline-none transition-all duration-200"
+            />
+          </div>
         </div>
 
-        {message && (
-          <div
-            className={`p-3 rounded-md mb-4 text-center ${
-              message.type === "success"
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
-            }`}
-          >
-            {message.text}
-          </div>
-        )}
-
         {loading ? (
-          <div className="flex justify-center py-10 text-gray-500">
-            <Loader2 className="animate-spin mr-2" /> Loading categories...
+          <div className="bg-white rounded-3xl shadow-xl p-20 flex flex-col items-center justify-center">
+            <Loader2 className="animate-spin w-12 h-12 text-blue-600 mb-4" />
+            <p className="text-gray-500 font-medium">Loading categories...</p>
           </div>
-        ) : categories.length === 0 ? (
-          <p className="text-center text-gray-500 py-10">
-            No categories found. Click “Add Category” to create one.
-          </p>
+        ) : filteredCategories.length === 0 ? (
+          <div className="bg-white rounded-3xl shadow-xl p-20 text-center">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ImageIcon className="w-10 h-10 text-gray-400" />
+            </div>
+            <p className="text-gray-600 text-lg font-medium mb-2">
+              {searchTerm ? "No categories found" : "No categories yet"}
+            </p>
+            <p className="text-gray-400 text-sm mb-6">
+              {searchTerm
+                ? "Try adjusting your search"
+                : "Click 'Add Category' to create your first one"}
+            </p>
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+              >
+                Clear search
+              </button>
+            )}
+          </div>
         ) : (
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {categories.map((cat) => (
+
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+            {filteredCategories.map((cat, index) => (
               <div
                 key={cat._id}
-                className="border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition"
+                className={`flex items-center gap-4 p-5 hover:bg-gray-50 transition-colors duration-200 ${
+                  index !== filteredCategories.length - 1 ? "border-b border-gray-100" : ""
+                }`}
               >
-                <div className="relative w-full h-40 bg-gray-100 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
                   {cat.CatImage ? (
                     <img
                       src={cat.CatImage}
@@ -107,41 +128,36 @@ const CategoryPage = () => {
                       className="object-cover w-full h-full"
                     />
                   ) : (
-                    <ImageIcon className="w-10 h-10 text-gray-400" />
+                    <ImageIcon className="w-8 h-8 text-gray-300" />
                   )}
                 </div>
 
-                <div className="p-4">
-                  <h2 className="font-medium text-gray-800 mb-2 text-center">
-                    {cat.Name}
-                  </h2>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-gray-800 text-lg truncate">{cat.Name}</h3>
+                  <p className="text-sm text-gray-400">Category ID: {cat._id}</p>
+                </div>
 
-                  <div className="flex items-center justify-center gap-3">
-                    {/* Edit */}
-                    <Link
-                      href={`/admin/category/update/${cat._id}`}
-                      className="flex items-center text-sm bg-yellow-400 text-white px-3 py-1.5 rounded-md hover:bg-yellow-500 transition"
-                    >
-                      <Edit3 className="w-4 h-4 mr-1" /> Edit
-                    </Link>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Link
+                    href={`/admin/category/update/${cat._id}`}
+                    className="flex items-center text-sm bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition-all duration-200 font-medium shadow-md hover:shadow-lg"
+                  >
+                    <Edit3 className="w-4 h-4 mr-1.5" /> Edit
+                  </Link>
 
-                    {/* Delete */}
-                    <button
-                      onClick={() => handleDelete(cat._id)}
-                      disabled={deletingId === cat._id}
-                      className="flex items-center text-sm bg-red-500 text-white px-3 py-1.5 rounded-md hover:bg-red-600 transition disabled:opacity-70"
-                    >
-                      {deletingId === cat._id ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin mr-1" /> Deleting...
-                        </>
-                      ) : (
-                        <>
-                          <Trash2 className="w-4 h-4 mr-1" /> Delete
-                        </>
-                      )}
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => handleDelete(cat._id)}
+                    disabled={deletingId === cat._id}
+                    className="flex items-center text-sm bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all duration-200 disabled:opacity-70 font-medium shadow-md hover:shadow-lg"
+                  >
+                    {deletingId === cat._id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <Trash2 className="w-4 h-4 mr-1.5" /> Delete
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
             ))}

@@ -50,7 +50,7 @@ export async function POST(req: Request) {
             stream.end(buffer);
         })
         
-        const CatImage = uploadedImage.public_id;
+        const CatImage = uploadedImage.secure_url;
 
         const newCategory = await Category.create({
             Name,

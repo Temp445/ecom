@@ -26,7 +26,6 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
             <div className="absolute inset-0 border-4 border-emerald-200 rounded-full" />
             <div className="absolute inset-0 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
           </div>
-          <p className="text-emerald-600 font-medium">Checking permissions...</p>
         </div>
       </div>
     );

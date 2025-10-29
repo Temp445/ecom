@@ -6,13 +6,15 @@ import { ShoppingCart, Menu, X, Search } from 'lucide-react';
 import Image from 'next/image';
 import Logo from "@/assets/images/AceLogo.png";
 import UserMenu from '../Button/UserMenu';
-import { useAuth } from '@/context/AuthProvider'; // ✅ make sure this exists and provides user info
+import { useAuth } from '@/context/AuthProvider'; 
+import { useCart } from "@/context/CartProvider";
+import CartBadge from '../Button/CartBadge';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const { user } = useAuth(); // ✅ { user: { role: "admin" | "user" | null } }
-
+  const { user } = useAuth(); 
+  // const { cartCount } = useCart();
   const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/products', label: 'Products' },
@@ -21,16 +23,14 @@ export default function Navbar() {
     { href: '/blog', label: 'Blog' },
   ];
 
-  // ✅ Add admin dashboard link only if user is admin
   const allLinks = user?.role === 'admin'
     ? [...navLinks, { href: '/admin', label: 'Dashboard' }]
     : navLinks;
 
   return (
-    <nav className="bg-white sticky top-0 z-50 border-b border-gray-100">
+    <nav className="bg-white sticky top-0 z-[60] border-b border-gray-100">
       <div className="container mx-auto px-4 sm:px-6 lg:px-2 2xl:px-6">
         <div className="flex justify-between items-center py-0.5">
-          {/* Logo */}
           <Link href="/" className="flex flex-col items-center space-x-2 flex-shrink-0">
             <div className="flex items-end gap-1 justify-center">
               <Image src={Logo} alt="logo" width={40} height={40} />
@@ -39,7 +39,6 @@ export default function Navbar() {
             <span className='ml-3 -mt-1.5 font-medium uppercase text-sm'>Hydraulic</span>
           </Link>
 
-          {/* Desktop Nav Links */}
           <div className="hidden lg:flex items-center space-x-8">
             {allLinks.map((link) => (
               <Link
@@ -53,9 +52,7 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Right Side Icons */}
           <div className="flex items-center space-x-3 gap-3 lg:space-x-3">
-            {/* Search Bar (Desktop) */}
             <div className="hidden md:flex items-center">
               <div className="flex items-center bg-gray-50 rounded-full px-4 py-2 border border-gray-200 hover:border-gray-900 transition-colors">
                 <Search className="w-4 h-4 text-gray-600" />
@@ -67,18 +64,21 @@ export default function Navbar() {
               </div>
             </div>
 
-            {/* User Menu */}
             <UserMenu />
 
-            {/* Cart */}
-            <Link href="/cart" className="relative text-gray-800 hover:text-gray-900 rounded-full transition-colors group">
+            {/* <Link href="/cart" className="relative text-gray-800 hover:text-gray-900 rounded-full transition-colors group">
               <ShoppingCart className="w-6 h-6 transition-transform" />
               <span className="absolute -top-1.5 -right-1.5 bg-gray-800 text-white text-xs font-bold rounded-full px-1 h-fit flex items-center justify-center shadow-lg">
                 0
               </span>
-            </Link>
+                {cartCount > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+              {cartCount}
+            </span>
+          )}
+            </Link> */}
+            <div> <CartBadge/> </div>
 
-            {/* Search Toggle (Mobile) */}
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
               className="md:hidden p-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-500 rounded-full transition-colors"
@@ -86,7 +86,6 @@ export default function Navbar() {
               <Search className="w-5 h-5" />
             </button>
 
-            {/* Mobile Menu Toggle */}
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="lg:hidden p-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-500 rounded-full transition-colors"

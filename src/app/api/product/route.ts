@@ -74,7 +74,7 @@ export async function POST(req: Request) {
         stream.end(buffer);
       });
 
-      thumbnailUrl = uploadedThumb.public_id;
+      thumbnailUrl = uploadedThumb.secure_url;
     }
 
     // Upload Product Images 
@@ -100,7 +100,7 @@ export async function POST(req: Request) {
         stream.end(buffer);
       });
 
-      imageUrls.push(uploadedImage.public_id);
+      imageUrls.push(uploadedImage.secure_url);
     }
 
     const product = await Product.create({

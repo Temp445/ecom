@@ -97,7 +97,7 @@ export async function PUT(
         stream.end(buffer);
       });
 
-      product.thumbnail = uploadedThumb.public_id; 
+      product.thumbnail = uploadedThumb.secure_url; 
     }
 
     // Upload Product Images
@@ -123,7 +123,7 @@ export async function PUT(
           stream.end(buffer);
         });
 
-        imageUrls.push(uploadedImage.public_id);
+        imageUrls.push(uploadedImage.secure_url);
       }
 
       product.images = imageUrls;

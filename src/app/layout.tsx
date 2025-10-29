@@ -4,6 +4,8 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthProvider";
 import Header from "@/Components/Common/Header";
 import Navbar from "@/Components/Common/Navbar";
+import ToastProvider from "@/Components/Common/ToastProvider";
+import { CartProvider } from "@/context/CartProvider";
 
 
 const rubik = Rubik({
@@ -33,9 +35,12 @@ export default function RootLayout({
         className={`${rubik.variable} ${poppins.variable} antialiased`}
       >
          <AuthProvider>
+          <CartProvider>
          <Header/>
         <Navbar/>
         {children}
+        <ToastProvider/>
+        </CartProvider>
         </AuthProvider>
       </body>
     </html>

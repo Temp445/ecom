@@ -2,7 +2,15 @@
 
 import React, { useState } from "react";
 import axios from "axios";
-import { Loader2, Upload, Image as ImageIcon } from "lucide-react";
+import {
+  Loader2,
+  Upload,
+  Image as ImageIcon,
+  X,
+  ArrowLeft,
+} from "lucide-react";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const CategoryUploadPage = () => {
   const [formData, setFormData] = useState({
@@ -11,7 +19,7 @@ const CategoryUploadPage = () => {
   });
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.name === "CatImage" && e.target.files && e.target.files[0]) {
@@ -23,70 +31,83 @@ const CategoryUploadPage = () => {
     }
   };
 
+  const removeImage = () => {
+    setFormData({ ...formData, CatImage: null });
+    setPreview(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!formData.Name || !formData.CatImage) {
-      setMessage({ type: "error", text: "Please provide both name and image." });
+      toast.error("Please provide both name and image.");
       return;
     }
 
     try {
       setLoading(true);
-      setMessage(null);
       const data = new FormData();
       data.append("Name", formData.Name);
       data.append("CatImage", formData.CatImage);
 
-      const res = await axios.post("/api/category", data);
-      setMessage({ type: "success", text: "Category uploaded successfully!" });
+      await axios.post("/api/category", data);
+
+      toast.success("Category uploaded successfully!");
       setFormData({ Name: "", CatImage: null });
       setPreview(null);
+      router.push("/admin/category");
+
     } catch (error: any) {
-      setMessage({
-        type: "error",
-        text: error.response?.data?.message || "Failed to upload category.",
-      });
+      toast.error(
+        error.response?.data?.message || "Failed to upload category."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-10">
-      <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md">
-        <h1 className="text-2xl font-semibold mb-6 text-center">Upload Category</h1>
-
-        {message && (
-          <div
-            className={`p-3 rounded-md mb-4 text-center ${
-              message.type === "success"
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
-            }`}
-          >
-            {message.text}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Category Name */}
+    <div className="min-h-screen flex items-center justify-center bg-white/50 py-12 px-4">
+      <div className="bg-white shadow-2xl rounded-3xl p-8 w-full max-w-lg border border-gray-100">
+        <div className="flex items-start justify-between mb-8">
           <div>
-            <label className="block font-medium mb-1">Category Name</label>
+            <h1 className="text-3xl font-semibold text-gray-800 mb-2">
+              Upload Category
+            </h1>
+            <p className="text-gray-500 text-sm">
+              Add a new category with an image
+            </p>
+          </div>
+          <button
+            onClick={() => router.back()}
+            className="flex items-center text-gray-500 hover:text-gray-800 transition"
+          >
+            <ArrowLeft size={20} className="mr-1" /> Back
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Category Name
+            </label>
             <input
               type="text"
               name="Name"
               value={formData.Name}
               onChange={handleChange}
-              className="w-full border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 outline-none"
-              placeholder="Enter category name"
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-1 outline-none transition-all duration-200 text-gray-800 placeholder-gray-400"
+              placeholder=""
             />
           </div>
 
-          {/* Image Upload */}
           <div>
-            <label className="block font-medium mb-1">Category Image</label>
-            <div className="flex items-center gap-3">
-              <label className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Category Image
+            </label>
+
+            {!preview ? (
+              <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-8 cursor-pointer hover:border-gray-500 hover:bg-blue-50 transition-all duration-200 group">
                 <input
                   type="file"
                   name="CatImage"
@@ -94,35 +115,52 @@ const CategoryUploadPage = () => {
                   className="hidden"
                   onChange={handleChange}
                 />
-                <ImageIcon className="w-8 h-8 text-gray-500 mb-1" />
-                <span className="text-sm text-gray-600">
-                  {formData.CatImage ? formData.CatImage.name : "Upload Image"}
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-gray-100 transition-colors">
+                  <ImageIcon className="w-8 h-8 text-gray-400 group-hover:text-gray-900 transition-colors" />
+                </div>
+                <span className="text-sm font-medium text-gray-600 mb-1">
+                  Click to upload image
                 </span>
               </label>
-
-              {preview && (
+            ) : (
+              <div className="relative rounded-xl overflow-hidden border-2 border-gray-200 group">
                 <img
                   src={preview}
                   alt="Preview"
-                  className="w-16 h-16 object-cover rounded-lg border"
+                  className="w-full h-48 object-cover"
                 />
-              )}
-            </div>
+                <div className="absolute inset-0 group-hover:bg-black/30  transition-all duration-200 flex items-center justify-center">
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white text-red-600 rounded-full p-2 hover:bg-red-50"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3">
+                  <p className="text-white text-sm font-medium truncate">
+                    {formData.CatImage?.name}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg flex items-center justify-center hover:bg-blue-700 transition disabled:opacity-70"
+            className="w-full bg-emerald-700 text-white py-3.5 rounded-xl flex items-center justify-center transition-all duration-200 font-semibold shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
           >
             {loading ? (
               <>
-                <Loader2 className="animate-spin mr-2 w-5 h-5" /> Uploading...
+                <Loader2 className="animate-spin mr-2 w-5 h-5" />
+                Uploading...
               </>
             ) : (
               <>
-                <Upload className="mr-2 w-5 h-5" /> Upload Category
+                <Upload className="mr-2 w-5 h-5" />
+                Upload Category
               </>
             )}
           </button>
