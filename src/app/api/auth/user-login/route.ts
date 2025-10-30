@@ -4,9 +4,10 @@ import dbConnect from "@/lib/dbConnect";
 import User from "@/models/User";
 import jwt from "jsonwebtoken";
 
-const generateToken = (id: string) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET!, { expiresIn: "3d" });
+const generateToken = (userId: string) => {
+  return jwt.sign({ userId }, process.env.JWT_SECRET!, { expiresIn: "3d" });
 };
+
 
 export async function POST(req: NextRequest) {
   try {

@@ -11,10 +11,12 @@ const LoginPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
+  // 📩 Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // 🚀 Handle login submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -38,19 +40,50 @@ const LoginPage = () => {
         return;
       }
 
+      // ✅ Store user data
       localStorage.setItem("token", data.token);
       localStorage.setItem("userId", data.user._id);
       localStorage.setItem("role", data.user.role);
       localStorage.setItem("user", JSON.stringify(data.user));
 
+      // 🛒 Merge guest cart into user cart (if exists)
+      const guestCart = JSON.parse(localStorage.getItem("guestCart") || "[]");
+
+      if (guestCart.length > 0) {
+        try {
+          await fetch("/api/cart", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${data.token}`,
+            },
+            body: JSON.stringify({
+              items: guestCart.map((i: any) => ({
+                productId: i.product._id,
+                quantity: i.quantity,
+              })),
+            }),
+          });
+
+          // 🧹 Clear guest cart after merging
+          localStorage.removeItem("guestCart");
+        } catch (err) {
+          console.error("Cart merge error:", err);
+        }
+      }
+
+      // 🔔 Notify CartProvider to refresh instantly
+      window.dispatchEvent(new Event("cartUpdated"));
       window.dispatchEvent(new Event("userLogin"));
 
+      // 🔀 Redirect based on role
       if (data.user.role === "admin") {
         router.push("/admin");
       } else {
         router.push("/");
       }
     } catch (err) {
+      console.error("Login error:", err);
       setError("Something went wrong. Please try again later.");
     } finally {
       setLoading(false);

@@ -9,7 +9,9 @@ const Admin = ({
 }>) => {
   return (
     <div className="flex">
+      <div className="relative w-[17vw]">
       <Sidebar />
+      </div>
       <div className="flex-1">
         <ProductedRoute>{children}</ProductedRoute>
       </div>

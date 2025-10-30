@@ -37,6 +37,7 @@ const ProductEditPage = () => {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
+  // ✅ Fetch product + categories
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -71,10 +72,27 @@ const ProductEditPage = () => {
     fetchData();
   }, [pathUrl]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  // ✅ Handle input change safely
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target;
+
+    if (type === "number") {
+      if (value === "") {
+        setFormData({ ...formData, [name]: "" });
+        return;
+      }
+
+      // Prevent negative numbers
+      const numericValue = Math.max(0, Number(value));
+      setFormData({ ...formData, [name]: numericValue });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
+  // ✅ Thumbnail Upload
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -88,6 +106,7 @@ const ProductEditPage = () => {
     setThumbnailPreview(null);
   };
 
+  // ✅ Gallery Image Upload
   const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const newFiles = [...images, ...files];
@@ -105,6 +124,7 @@ const ProductEditPage = () => {
     setExistingImages(existingImages.filter((img) => img !== url));
   };
 
+  // ✅ Handle Form Submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -117,7 +137,13 @@ const ProductEditPage = () => {
       setLoading(true);
 
       const data = new FormData();
-      Object.entries(formData).forEach(([key, value]) => data.append(key, value));
+
+      Object.entries(formData).forEach(([key, value]) => {
+        // Skip discountPrice if empty
+        if (key === "discountPrice" && (value === "" || value === null)) return;
+        data.append(key, value);
+      });
+
       if (thumbnail) data.append("thumbnail", thumbnail);
       images.forEach((file) => data.append("images", file));
       data.append("existingImages", JSON.stringify(existingImages));
@@ -141,6 +167,7 @@ const ProductEditPage = () => {
     );
   }
 
+  // ✅ Render
   return (
     <div className="min-h-screen flex items-center justify-center bg-white/50 py-12 px-4">
       <div className="bg-white shadow-2xl rounded-3xl p-8 w-full max-w-3xl border border-gray-100">
@@ -158,6 +185,7 @@ const ProductEditPage = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Product Name *</label>
@@ -184,6 +212,7 @@ const ProductEditPage = () => {
             </div>
           </div>
 
+          {/* Description */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Description *</label>
             <textarea
@@ -196,6 +225,7 @@ const ProductEditPage = () => {
             />
           </div>
 
+          {/* Category + Model */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Category *</label>
@@ -227,16 +257,18 @@ const ProductEditPage = () => {
             </div>
           </div>
 
+          {/* Price + Discount + Stock */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Price *</label>
               <input
                 type="number"
                 name="price"
+                min="0"
                 value={formData.price}
                 onChange={handleChange}
                 className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 outline-none text-gray-800"
-                placeholder="0.00"
+                placeholder="1000"
               />
             </div>
 
@@ -245,10 +277,11 @@ const ProductEditPage = () => {
               <input
                 type="number"
                 name="discountPrice"
+                min="0"
                 value={formData.discountPrice}
                 onChange={handleChange}
                 className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 outline-none text-gray-800"
-                placeholder="0.00"
+                placeholder="500"
               />
             </div>
 
@@ -257,6 +290,7 @@ const ProductEditPage = () => {
               <input
                 type="number"
                 name="stock"
+                min="0"
                 value={formData.stock}
                 onChange={handleChange}
                 className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 outline-none text-gray-800"
@@ -323,6 +357,7 @@ const ProductEditPage = () => {
             </div>
           </div>
 
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}

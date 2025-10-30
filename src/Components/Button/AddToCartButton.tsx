@@ -33,7 +33,6 @@ export default function AddToCartButton({
         let guestCart =
           JSON.parse(localStorage.getItem("guestCart") || "[]") || [];
 
-        // check if product already exists in local cart
         const existingItemIndex = guestCart.findIndex(
           (item: any) => item.product._id === product._id
         );
@@ -43,28 +42,33 @@ export default function AddToCartButton({
           return;
         }
 
-        // new product → add to cart
         guestCart.push({ product, quantity });
         localStorage.setItem("guestCart", JSON.stringify(guestCart));
 
         toast.success("Added to cart!");
-        await refreshCart(); // update cart count
+        await refreshCart();
         return;
       }
 
-      // 👤 Logged-in user → API call
-      const res = await axios.post("/api/cart", {
-        userId,
-        productId: product._id,
-        quantity,
-      });
+      // 👤 Logged-in user → API call with token
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Please login first.");
+        return;
+      }
+
+      const res = await axios.post(
+        "/api/cart",
+        { items: [{ productId: product._id, quantity }] },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (res.data.success) {
-        if (res.data.message === "Already in cart") {
-          toast.error("Already in cart!");
-        } else {
-          toast.success("Added to cart!");
-        }
+        toast.success("Added to cart!");
         await refreshCart();
       } else {
         toast.error(res.data.message || "Failed to add to cart.");

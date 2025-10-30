@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CircleUserRound, LogOut, LogIn, UserPlus, Clock, ChevronUp } from "lucide-react";
+import { CircleUserRound, LogOut, LogIn, UserPlus, MapPin, Package, ChevronUp, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthProvider";
@@ -26,7 +26,7 @@ const UserMenu = () => {
     >
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="hidden sm:flex items-center gap-2 justify-center text-gray-800 rounded py-2 px-4 transition group"
+        className="hidden sm:flex items-center gap-2  justify-center text-gray-800  rounded py-2 px-4 transition group"
       >
         {isLoggedIn ? (
           <div className="flex gap-2 items-center">
@@ -47,48 +47,87 @@ const UserMenu = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute -right-10 w-44 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50">
+        <div className="absolute right-0 w-56 bg-white border border-gray-200 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           {isLoggedIn ? (
             <>
-              <Link
-                href={`/user-profile/${user?._id}`}
-                className="flex items-center px-4 py-2 text-gray-700 text-sm hover:bg-gray-100"
-              >
-                <CircleUserRound className="w-4 h-4 mr-2" /> My Profile
-              </Link>
+              <div className="px-4 py-3 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-md">
+                    {user?.firstName?.charAt(0) || "U"}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-800">{user?.firstName || "User"}</p>
+                    <p className="text-xs text-gray-500">Manage your account</p>
+                  </div>
+                </div>
+              </div>
 
-              <Link
-                href="/orders"
-                className="flex items-center px-4 py-2 text-gray-700 text-sm hover:bg-gray-100"
-              >
-                <Clock className="w-4 h-4 mr-2" /> Orders
-              </Link>
+              <div className="py-1">
+                <a
+                  href={`/user-profile/${user?._id}`}
+                  className="flex items-center px-4 py-2.5 text-gray-700 text-sm hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200 group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center mr-3 group-hover:bg-blue-200 transition-colors">
+                    <User className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <span className="font-medium">My Profile</span>
+                </a>
+
+                <a
+                  href="/addresses"
+                  className="flex items-center px-4 py-2.5 text-gray-700 text-sm hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all duration-200 group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center mr-3 group-hover:bg-green-200 transition-colors">
+                    <MapPin className="w-4 h-4 text-green-600" />
+                  </div>
+                  <span className="font-medium">Addresses</span>
+                </a>
+
+                <a
+                  href="/orders"
+                  className="flex items-center px-4 py-2.5 text-gray-700 text-sm hover:bg-gradient-to-r hover:from-orange-50 hover:to-amber-50 transition-all duration-200 group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center mr-3 group-hover:bg-orange-200 transition-colors">
+                    <Package className="w-4 h-4 text-orange-600" />
+                  </div>
+                  <span className="font-medium">My Orders</span>
+                </a>
+              </div>
 
               <div className="border-t border-gray-100 my-1" />
 
               <button
                 onClick={handleLogout}
-                className="w-full text-left flex items-center px-4 py-2 text-gray-700 text-sm hover:bg-gray-100"
+                className="w-full text-left flex items-center px-4 py-2.5 text-red-600 text-sm hover:bg-red-50 transition-all duration-200 group"
               >
-                <LogOut className="w-4 h-4 mr-2" /> Logout
+                <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center mr-3 group-hover:bg-red-200 transition-colors">
+                  <LogOut className="w-4 h-4 text-red-600" />
+                </div>
+                <span className="font-medium">Logout</span>
               </button>
             </>
           ) : (
-            <>
-              <Link
+            <div className="py-1">
+              <a
                 href="/register"
-                className="flex items-center px-4 py-2 text-gray-700 text-sm hover:bg-gray-100"
+                className="flex items-center px-4 py-2.5 text-gray-700 text-sm hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-200 group"
               >
-                <UserPlus className="w-4 h-4 mr-2" /> Sign Up
-              </Link>
+                <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center mr-3 group-hover:bg-purple-200 transition-colors">
+                  <UserPlus className="w-4 h-4 text-purple-600" />
+                </div>
+                <span className="font-medium">Sign Up</span>
+              </a>
 
-              <Link
+              <a
                 href="/login"
-                className="flex items-center px-4 py-2 text-gray-700 text-sm hover:bg-gray-100"
+                className="flex items-center px-4 py-2.5 text-gray-700 text-sm hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 group"
               >
-                <LogIn className="w-4 h-4 mr-2" /> Login
-              </Link>
-            </>
+                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center mr-3 group-hover:bg-blue-200 transition-colors">
+                  <LogIn className="w-4 h-4 text-blue-600" />
+                </div>
+                <span className="font-medium">Login</span>
+              </a>
+            </div>
           )}
         </div>
       )}

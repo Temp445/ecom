@@ -1,74 +1,86 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import Cart from "@/models/Cart";
+import { registerModels } from "@/models";
+import { verifyAuthToken } from "@/lib/auth";
 
 export async function GET(req: Request) {
   try {
     await dbConnect();
+    registerModels();
 
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
 
-    if (!userId)
-      return NextResponse.json(
-        { message: "User ID required" },
-        { status: 400 }
-      );
+    if (!userId) {
+      return NextResponse.json({ message: "User ID required" }, { status: 400 });
+    }
 
     const cart = await Cart.findOne({ userId }).populate("items.productId");
 
-    if (!cart) return NextResponse.json({ cart: { items: [] } });
+    if (!cart) {
+      return NextResponse.json({ cart: { items: [] } }, { status: 200 });
+    }
 
     return NextResponse.json({ cart }, { status: 200 });
-  } catch (error) {
-    console.error("Error fetching cart:", error);
-    return NextResponse.json({ message: "Server error" }, { status: 500 });
+  } catch (err: any) {
+    console.error("Error fetching cart:", err);
+    return NextResponse.json({ message: err.message || "Server error" }, { status: 500 });
   }
 }
 
 export async function POST(req: Request) {
   try {
     await dbConnect();
-    const body = await req.json();
-    const { userId, productId, quantity } = body;
+    registerModels();
 
-    if (!userId || !productId) {
-      return NextResponse.json(
-        { message: "userId and productId are required" },
-        { status: 400 }
-      );
+    const authHeader = req.headers.get("authorization");
+    const user = verifyAuthToken(authHeader);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    let cart = await Cart.findOne({ userId });
+    const { items } = await req.json();
+    if (!Array.isArray(items)) {
+      return NextResponse.json({ error: "Invalid items" }, { status: 400 });
+    }
 
-    if (!cart) {
-      cart = new Cart({
-        userId,
-        items: [{ productId, quantity: quantity || 1 }],
+    const sanitized = items
+      .filter((i: any) => i.productId && Number(i.quantity) > 0)
+      .map((i: any) => ({
+        productId: i.productId,
+        quantity: Number(i.quantity),
+      }));
+
+    let userCart = await Cart.findOne({ userId: user.userId });
+
+    if (!userCart) {
+      userCart = new Cart({
+        userId: user.userId,
+        items: sanitized,
       });
     } else {
-      const existingItem = cart.items.find(
-        (item: { productId: { toString: () => any } }) =>
-          item.productId.toString() === productId
-      );
-
-      if (existingItem) {
-        return NextResponse.json({ success: true, message: "Already in cart" });
+      for (const incoming of sanitized) {
+        const existing = userCart.items.find(
+          (i: { productId: { toString: () => any; }; }) => i.productId.toString() === incoming.productId
+        );
+        if (existing) {
+           return NextResponse.json({success: false, message: "Already in cart"})
+        } else {
+          userCart.items.push({
+            productId: incoming.productId,
+            quantity: incoming.quantity,
+          });
+        }
       }
     }
-    cart.items.push({ productId, quantity });
-    await cart.save();
-    const populatedCart = await cart.populate("items.productId");
 
-    return NextResponse.json({
-      success: true,
-      message: "Item added to cart",
-      cart: populatedCart,
-    });
+    await userCart.save();
+    const updatedCart = await Cart.findById(userCart._id).populate("items.productId");
+
+    return NextResponse.json({ success: true, cart: updatedCart }, { status: 200 });
   } catch (err: any) {
-    return NextResponse.json(
-      { success: false, error: err.message },
-      { status: 500 }
-    );
+    console.error("merge cart error", err);
+    return NextResponse.json({ error: err.message || "Server error" }, { status: 500 });
   }
 }

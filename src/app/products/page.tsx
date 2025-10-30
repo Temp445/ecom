@@ -2,17 +2,17 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Loader2, Eye } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import AddToCartButton from "@/Components/Button/AddToCartButton"; // ✅ import the real component
+import AddToCartButton from "@/Components/Button/AddToCartButton";
 import { useAuth } from "@/context/AuthProvider";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchProducts();

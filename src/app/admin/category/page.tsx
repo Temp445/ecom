@@ -23,7 +23,7 @@ const CategoryPage = () => {
 
   const filteredCategories = categories.filter((cat) =>
     cat.Name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ); 
 
   const fetchCategories = async () => {
     try {
@@ -120,19 +120,19 @@ const CategoryPage = () => {
                   index !== filteredCategories.length - 1 ? "border-b border-gray-100" : ""
                 }`}
               >
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                <div className="w-16 h-16 rounded-xl bg-white flex items-center justify-center overflow-hidden flex-shrink-0">
                   {cat.CatImage ? (
                     <img
                       src={cat.CatImage}
                       alt={cat.Name}
-                      className="object-cover w-full h-full"
+                      className="object-contain w-full h-full"
                     />
                   ) : (
                     <ImageIcon className="w-8 h-8 text-gray-300" />
                   )}
                 </div>
 
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 border-l pl-3">
                   <h3 className="font-bold text-gray-800 text-lg truncate">{cat.Name}</h3>
                   <p className="text-sm text-gray-400">Category ID: {cat._id}</p>
                 </div>

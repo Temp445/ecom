@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
     try{
         await dbConnect();
-        const categories = await Category.find().sort({ uploadedAt: -1 });
+        const categories = await Category.find();
         return NextResponse.json({ success: true, data: categories }, {status: 200});
     } catch (err: any) {
         return NextResponse.json({ success: false, message: err.message || "Failed to fetch Category" }, {status: 500})

@@ -28,7 +28,7 @@ export default function Navbar() {
     : navLinks;
 
   return (
-    <nav className="bg-white sticky top-0 z-[60] border-b border-gray-100">
+    <nav className="bg-white sticky top-0 z-50 border-b border-gray-100">
       <div className="container mx-auto px-4 sm:px-6 lg:px-2 2xl:px-6">
         <div className="flex justify-between items-center py-0.5">
           <Link href="/" className="flex flex-col items-center space-x-2 flex-shrink-0">

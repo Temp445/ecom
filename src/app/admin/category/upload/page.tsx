@@ -127,7 +127,7 @@ const CategoryUploadPage = () => {
                 <img
                   src={preview}
                   alt="Preview"
-                  className="w-full h-48 object-cover"
+                  className="w-full h-48 object-contain"
                 />
                 <div className="absolute inset-0 group-hover:bg-black/30  transition-all duration-200 flex items-center justify-center">
                   <button
@@ -138,7 +138,7 @@ const CategoryUploadPage = () => {
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3">
+                <div className="absolute bottom-0 left-0 righ-0 p-3">
                   <p className="text-white text-sm font-medium truncate">
                     {formData.CatImage?.name}
                   </p>
