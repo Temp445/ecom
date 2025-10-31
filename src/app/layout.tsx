@@ -4,7 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthProvider";
 import Header from "@/Components/Common/Header";
 import Navbar from "@/Components/Common/Navbar";
-import ToastProvider from "@/Components/Common/ToastProvider";
+import Toast from "@/Components/Common/Toast";
 import { CartProvider } from "@/context/CartProvider";
 
 
@@ -39,7 +39,7 @@ export default function RootLayout({
          <Header/>
         <Navbar/>
         {children}
-        <ToastProvider/>
+        <Toast/>
         </CartProvider>
         </AuthProvider>
       </body>

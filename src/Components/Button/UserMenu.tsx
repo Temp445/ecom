@@ -26,7 +26,7 @@ const UserMenu = () => {
     >
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="hidden sm:flex items-center gap-2  justify-center text-gray-800  rounded py-2 px-4 transition group"
+        className="flex items-center gap-2  justify-center text-gray-800  rounded py-4 px-4 transition group"
       >
         {isLoggedIn ? (
           <div className="flex gap-2 items-center">
@@ -64,7 +64,7 @@ const UserMenu = () => {
 
               <div className="py-1">
                 <a
-                  href={`/user-profile/${user?._id}`}
+                  href={`/user-profile`}
                   className="flex items-center px-4 py-2.5 text-gray-700 text-sm hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200 group"
                 >
                   <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center mr-3 group-hover:bg-blue-200 transition-colors">

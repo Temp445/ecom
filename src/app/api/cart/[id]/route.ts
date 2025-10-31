@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 import dbconnect from "@/lib/dbConnect";
 import Cart from "@/models/Cart";
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise <{ id: string }> }) {
   try {
     await dbconnect();
+    const {id} = await params
+    
     const { quantity } = await req.json();
 
     if (!quantity || quantity < 1) {
@@ -14,14 +16,14 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       );
     }
 
-    const cart = await Cart.findOne({ "items._id": params.id });
+    const cart = await Cart.findOne({ "items._id": id });
     if (!cart)
       return NextResponse.json(
         { success: false, message: "Item not found in cart" },
         { status: 404 }
       );
 
-    const item = cart.items.id(params.id);
+    const item = cart.items.id(id);
     if (!item)
       return NextResponse.json(
         { success: false, message: "Item not found" },
@@ -41,11 +43,12 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise <{ id: string }> }) {
   try {
     await dbconnect();
+    const { id } = await params
 
-    const cart = await Cart.findOne({ "items._id": params.id });
+    const cart = await Cart.findOne({ "items._id": id });
     if (!cart)
       return NextResponse.json(
         { success: false, message: "Item not found in cart" },
@@ -53,7 +56,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
       );
 
     cart.items = cart.items.filter(
-      (item: any) => item._id.toString() !== params.id
+      (item: any) => item._id.toString() !== id
     );
 
     await cart.save();

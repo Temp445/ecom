@@ -11,7 +11,7 @@ export async function GET(
     await dbConnect();
     const { pathUrl } = await params;
 
-    const product = await Product.findOne({ pathUrl });
+    const product = await Product.findOne({ pathUrl }).populate("category");
 
     if (!product) {
       return NextResponse.json(

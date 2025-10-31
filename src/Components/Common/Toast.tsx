@@ -1,8 +1,7 @@
 "use client";
 
 import { Toaster } from "react-hot-toast";
-
-export default function ToastProvider() {
+const Toast = () => {
   return (
     <Toaster
       position="top-right"
@@ -17,23 +16,25 @@ export default function ToastProvider() {
         },
         success: {
           iconTheme: {
-            primary: "#10B981", // green-500
+            primary: "#10B981",
             secondary: "#fff",
           },
-           style: {
-          background: "#fffff",
-          color: "#00000",
-          borderRadius: "8px",
-          fontSize: "14px",
-        }
+          style: {
+            background: "#fffff",
+            color: "#00000",
+            borderRadius: "8px",
+            fontSize: "14px",
+          },
         },
         error: {
           iconTheme: {
-            primary: "#EF4444", // red-500
+            primary: "#EF4444",
             secondary: "#fff",
           },
         },
       }}
     />
   );
-}
+};
+
+export default Toast;

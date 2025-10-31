@@ -12,11 +12,6 @@
   --font-poppins: var(--font-poppins)
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #F4F4F4;
-  }
-}
 
 body {
   background: var(--background);

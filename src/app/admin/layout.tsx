@@ -8,10 +8,9 @@ const Admin = ({
   children: React.ReactNode;
 }>) => {
   return (
-    <div className="flex">
-      <div className="relative w-[17vw]">
+    <div className="flex min-h-screen container mx-auto">
       <Sidebar />
-      </div>
+
       <div className="flex-1">
         <ProductedRoute>{children}</ProductedRoute>
       </div>

@@ -3,11 +3,13 @@ import Address from "@/models/Address";
 import { NextResponse } from "next/server";
 
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise <{ id: string }> }) {
   try {
     await dbConnect();
 
-    const address = await Address.findById(params.id);
+    const { id } = await params
+
+    const address = await Address.findById(id);
     if (!address) {
       return NextResponse.json(
         { success: false, message: "Address not found" },
@@ -24,15 +26,15 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-// ============================
-// ✏️ PUT - Update Address by ID
-// ============================
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+
+export async function PUT(req: Request, { params }: { params:  Promise <{ id: string }> }) {
   try {
     await dbConnect();
+    const { id } = await params
+
     const data = await req.json();
 
-    const updatedAddress = await Address.findByIdAndUpdate(params.id, data, {
+    const updatedAddress = await Address.findByIdAndUpdate( id, data, {
       new: true,
     });
 
@@ -55,17 +57,17 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-// ============================
-// 🗑️ DELETE - Delete Address by ID
-// ============================
+
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise <{ id: string }> }
 ) {
   try {
     await dbConnect();
 
-    const deletedAddress = await Address.findByIdAndDelete(params.id);
+    const { id } = await params
+
+    const deletedAddress = await Address.findByIdAndDelete(id);
     if (!deletedAddress) {
       return NextResponse.json(
         { success: false, message: "Address not found" },

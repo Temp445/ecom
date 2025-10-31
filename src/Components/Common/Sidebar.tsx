@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
   const menuItems = [
@@ -27,7 +27,7 @@ const Sidebar = () => {
 
   return (
     <>
-      <div className="md:hidden  flex items-center justify-between p-4 bg-gray-900 text-white">
+      <div className="md:hidden fixed top-0 left-0 w-full bg-gray-900 text-white flex items-center justify-between p-4 z-50">
         <h1 className="text-lg font-semibold">Admin Panel</h1>
         <button onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? <X size={22} /> : <Menu size={22} />}
@@ -35,9 +35,8 @@ const Sidebar = () => {
       </div>
 
       <aside
-        className={`${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 fixed top-14 left-0 h-full md:h-screen w-64 bg-gray-900 text-gray-100 transition-transform duration-300 -z-20 flex flex-col`}
+        className={`fixed md:sticky top-15 left-0 h-[100vh] w-64 bg-gray-900 text-gray-100 z-40 transform transition-transform duration-300 ease-in-out flex flex-col
+        ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
           <h2 className="text-xl font-bold">Admin Panel</h2>
@@ -64,6 +63,7 @@ const Sidebar = () => {
                           ? "bg-gray-800 text-white"
                           : "text-gray-400 hover:bg-gray-800 hover:text-white"
                       }`}
+                    onClick={() => setIsOpen(false)}
                   >
                     <Icon size={18} />
                     {item.name}
@@ -73,9 +73,9 @@ const Sidebar = () => {
             })}
           </ul>
         </nav>
-
-      
       </aside>
+
+      <div className="md:hidden h-16" />
     </>
   );
 };

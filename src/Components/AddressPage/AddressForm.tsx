@@ -20,7 +20,7 @@ interface AddressType {
   AltPhoneNumber?: string;
 }
 
-export default function AddressForm() {
+const Address = () => {
   const { user } = useAuth();
 
   const [formData, setFormData] = useState<AddressType>({
@@ -87,7 +87,7 @@ export default function AddressForm() {
       }
 
       setFormData({
-        userId: user?._id,
+        userId: user?._id ?? "",
         Name: '',
         MobileNumber: '',
         PinCode: '',
@@ -100,7 +100,7 @@ export default function AddressForm() {
       });
 
       setShowForm(false);
-      fetchAddresses(user?._id);
+      fetchAddresses(user?._id ?? "");
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Something went wrong');
     } finally {
@@ -119,7 +119,7 @@ export default function AddressForm() {
     try {
       const res = await axios.delete(`/api/address/${id}`);
       toast.success(res.data.message || 'Address deleted');
-      fetchAddresses(user?._id);
+      fetchAddresses(user?._id ?? "");
     } catch {
       toast.error('Failed to delete address');
     }
@@ -127,7 +127,7 @@ export default function AddressForm() {
 
   const cancelEdit = () => {
     setFormData({
-      userId: user?._id,
+      userId: user?._id ?? "",
       Name: '',
       MobileNumber: '',
       PinCode: '',
@@ -145,28 +145,25 @@ export default function AddressForm() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Delivery Addresses</h1>
-          <p className="text-slate-600">Manage your saved delivery addresses</p>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Addresses</h1>
+          <p className="text-slate-600">Manage your delivery addresses</p>
         </div>
 
-        {/* Add Address Button */}
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="mb-6 flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-all shadow-md hover:shadow-lg"
+            className="mb-6 flex items-center gap-2  text-gray-900 border px-6 py-3 rounded hover:text-white hover:bg-emerald-600 hover:border-emerald-600 transition-all shadow-md hover:shadow-lg"
           >
             <Plus size={20} />
             Add New Address
           </button>
         )}
 
-        {/* Address Form */}
         {showForm && (
           <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-slate-200">
             <h2 className="text-xl font-semibold mb-6 text-slate-900 flex items-center gap-2">
-              <MapPin size={24} className="text-blue-600" />
+              <MapPin size={24} className="text-emerald-600" />
               {editingId ? 'Edit Address' : 'Add New Address'}
             </h2>
 
@@ -181,7 +178,7 @@ export default function AddressForm() {
                     placeholder="John Doe"
                     value={formData.Name}
                     onChange={handleChange}
-                    className="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    className="w-full border border-slate-300 p-3 rounded-lg  focus:border-gray-900 outline-none transition"
                     required
                   />
                 </div>
@@ -191,11 +188,12 @@ export default function AddressForm() {
                     Mobile Number <span className="text-red-500">*</span>
                   </label>
                   <input
+                    type="number"
                     name="MobileNumber"
                     placeholder="+91 98765 43210"
                     value={formData.MobileNumber}
                     onChange={handleChange}
-                    className="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    className="w-full border border-slate-300 p-3 rounded-lg focus:border-gray-900 outline-none transition no-spinner"
                     required
                   />
                 </div>
@@ -205,11 +203,12 @@ export default function AddressForm() {
                     Pin Code <span className="text-red-500">*</span>
                   </label>
                   <input
+                    type="number"
                     name="PinCode"
                     placeholder="600001"
                     value={formData.PinCode}
                     onChange={handleChange}
-                    className="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    className="w-full border border-slate-300 p-3 rounded-lg focus:border-gray-900 outline-none transition no-spinner"
                     required
                   />
                 </div>
@@ -223,7 +222,7 @@ export default function AddressForm() {
                     placeholder="Chennai"
                     value={formData.City}
                     onChange={handleChange}
-                    className="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    className="w-full border border-slate-300 p-3 rounded-lg focus:border-gray-900 outline-none transition"
                     required
                   />
                 </div>
@@ -237,7 +236,7 @@ export default function AddressForm() {
                     placeholder="Tamil Nadu"
                     value={formData.State}
                     onChange={handleChange}
-                    className="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    className="w-full border border-slate-300 p-3 rounded-lg focus:border-gray-900 outline-none transition"
                   />
                 </div>
 
@@ -250,7 +249,7 @@ export default function AddressForm() {
                     placeholder="India"
                     value={formData.Country}
                     onChange={handleChange}
-                    className="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    className="w-full border border-slate-300 p-3 rounded-lg focus:border-gray-900 outline-none transition"
                   />
                 </div>
               </div>
@@ -264,7 +263,7 @@ export default function AddressForm() {
                   placeholder="House No., Street Name, Area"
                   value={formData.Address}
                   onChange={handleChange}
-                  className="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                  className="w-full border border-slate-300 p-3 rounded-lg focus:border-gray-900 outline-none transition"
                   rows={3}
                   required
                 />
@@ -280,7 +279,7 @@ export default function AddressForm() {
                     placeholder="Near City Mall"
                     value={formData.LandMark}
                     onChange={handleChange}
-                    className="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    className="w-full border border-slate-300 p-3 rounded-lg focus:border-gray-900 outline-none transition"
                   />
                 </div>
 
@@ -289,11 +288,12 @@ export default function AddressForm() {
                     Alternate Phone
                   </label>
                   <input
+                    type="number"
                     name="AltPhoneNumber"
                     placeholder="+91 98765 43211"
                     value={formData.AltPhoneNumber}
                     onChange={handleChange}
-                    className="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    className="w-full border border-slate-300 p-3 rounded-lg focus:border-gray-900 outline-none transition no-spinner"
                   />
                 </div>
               </div>
@@ -302,7 +302,7 @@ export default function AddressForm() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:bg-slate-400 transition-all font-medium flex items-center justify-center gap-2 shadow-md"
+                  className="flex-1 bg-emerald-600 text-white py-3 rounded-lg hover:bg-emerald-700 disabled:bg-slate-400 transition-all font-medium flex items-center justify-center gap-2 shadow-md"
                 >
                   <Save size={20} />
                   {loading ? 'Saving...' : editingId ? 'Update Address' : 'Save Address'}
@@ -319,7 +319,6 @@ export default function AddressForm() {
           </div>
         )}
 
-        {/* Saved Addresses */}
         <div>
           <h3 className="text-xl font-semibold mb-4 text-slate-900">Saved Addresses</h3>
 
@@ -338,8 +337,8 @@ export default function AddressForm() {
                 >
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-start gap-3">
-                      <div className="bg-blue-100 p-2 rounded-lg">
-                        <MapPin size={20} className="text-blue-600" />
+                      <div className="bg-emerald-100 p-2 rounded-lg">
+                        <MapPin size={20} className="text-emerald-600" />
                       </div>
                       <div>
                         <h4 className="font-semibold text-lg text-slate-900">{addr.Name}</h4>
@@ -389,3 +388,5 @@ export default function AddressForm() {
     </div>
   );
 }
+
+export default Address

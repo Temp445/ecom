@@ -1,10 +1,10 @@
-import Checkout from '@/Components/CheckoutPage/Checkout'
+import CheckoutPageStepper from '@/Components/CheckoutPage/Checkout'
 import React from 'react'
 
 const CheckoutPage = () => {
   return (
     <div>
-        <Checkout/>
+        <CheckoutPageStepper/>
     </div>
   )
 }

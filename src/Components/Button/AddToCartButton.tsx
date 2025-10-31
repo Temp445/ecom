@@ -28,7 +28,6 @@ export default function AddToCartButton({
     try {
       setLoading(true);
 
-      // 🛒 If user not logged in → store in localStorage
       if (!userId) {
         let guestCart =
           JSON.parse(localStorage.getItem("guestCart") || "[]") || [];
@@ -50,7 +49,6 @@ export default function AddToCartButton({
         return;
       }
 
-      // 👤 Logged-in user → API call with token
       const token = localStorage.getItem("token");
       if (!token) {
         toast.error("Please login first.");
@@ -85,7 +83,7 @@ export default function AddToCartButton({
     <button
       onClick={handleAddToCart}
       disabled={loading}
-      className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+      className="flex items-center justify-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-950 transition disabled:opacity-50"
     >
       {loading ? (
         <Loader2 className="animate-spin w-4 h-4" />

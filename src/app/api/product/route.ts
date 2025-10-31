@@ -9,7 +9,7 @@ export async function GET(){
 
     try{
         await dbConnect();
-        const products = await Product.find().sort({ uploadedAt: -1 })
+        const products = await Product.find().sort({ uploadedAt: -1 }).populate("category", "_id Name");;
         return NextResponse.json({ success: true, data: products }, {status: 200})
 
     }catch (err: any){
