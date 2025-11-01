@@ -220,3 +220,74 @@ const UserMenu = () => {
 };
 
 export default UserMenu;
+
+
+"use client";
+
+import React, { useState } from "react";
+import PhoneInput, {
+  isValidPhoneNumber,
+} from "react-phone-number-input";
+import "react-phone-number-input/style.css";
+
+export default function PhoneValidationForm() {
+  const [phone, setPhone] = useState<string | undefined>();
+  const [error, setError] = useState<string>("");
+
+  // ✅ Handle form submission
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!phone) {
+      setError("Please enter your phone number.");
+      return;
+    }
+
+    if (!isValidPhoneNumber(phone)) {
+      setError("Please enter a valid phone number.");
+      return;
+    }
+
+    setError("");
+    alert(`✅ Phone number is valid: ${phone}`);
+  };
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded-2xl shadow-md w-full max-w-sm space-y-4"
+      >
+        <h2 className="text-2xl font-semibold text-center text-emerald-600">
+          Phone Number Validation
+        </h2>
+
+        <div>
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Phone Number
+          </label>
+
+          <PhoneInput
+            placeholder="Enter phone number"
+            value={phone}
+            onChange={setPhone}
+            defaultCountry="IN"
+            international
+            className="w-full rounded-md border border-gray-300 p-2"
+          />
+
+          {error && (
+            <p className="text-red-600 text-sm mt-1">{error}</p>
+          )}
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-emerald-600 text-white py-2 rounded-md hover:bg-emerald-700 transition-colors"
+        >
+          Validate
+        </button>
+      </form>
+    </div>
+  );
+}

@@ -3,9 +3,7 @@ import Address from "@/models/Address";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 
-// ============================
-// 📦 GET - Fetch Addresses
-// ============================
+
 export async function GET(req: Request) {
   try {
     await dbConnect();
@@ -32,15 +30,12 @@ export async function GET(req: Request) {
   }
 }
 
-// ============================
-// 📝 POST - Create Address
-// ============================
+
 export async function POST(req: Request) {
   try {
     await dbConnect();
     const data = await req.json();
 
-    // Validation for required fields
     const requiredFields = [
       "userId",
       "Name",
@@ -69,7 +64,6 @@ export async function POST(req: Request) {
       LandMark: data.LandMark || "",
       State: data.State || "",
       Country: data.Country || "",
-      AltPhoneNumber: data.AltPhoneNumber || "",
     });
 
     return NextResponse.json(

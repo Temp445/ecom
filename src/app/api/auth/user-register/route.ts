@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       firstName,
       lastName,
       email,
-      role: role || 'customer',
+      role: role || 'user',
       password: hashedPassword,
     });
 
@@ -52,12 +52,13 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       {
-        _id: user._id,
+     user:{ _id: user._id,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
         role: user.role,
-        token,
+       },
+       token,
       },
       { status: 201 }
     );

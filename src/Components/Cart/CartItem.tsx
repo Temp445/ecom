@@ -24,7 +24,7 @@ interface Product {
   pathUrl: string;
   price: number;
   discountPrice?: number;
-  stock: number;
+  stock?: number;
   thumbnail?: string;
   image?: string;
   images?: string[];
@@ -313,17 +313,6 @@ const CartItem = () => {
 
   const itemCount = cart.items.length;
 
-    const handleProceedToCheckout = () => {
-    if (!user || !user._id) {
-      // redirect to login with callback
-      router.push(`/orders`);
-      return;
-    }
-
-    // user is logged in — go to checkout page
-    router.push("/orders");
-  };
-
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="bg-black text-white py-6 px-4 shadow-lg">
@@ -524,7 +513,7 @@ const CartItem = () => {
                 </div>
               )}
 
-              <button  onClick={handleProceedToCheckout} className="w-full bg-emerald-700 text-white py-4 rounded-lg cursor-pointer font-semibold transition-all shadow-lg hover:shadow-xl mb-4">
+              <button  onClick={()=> router.push("/checkout")} className="w-full bg-emerald-700 text-white py-4 rounded-lg cursor-pointer font-semibold transition-all shadow-lg hover:shadow-xl mb-4">
                 Proceed to Checkout
               </button>
 

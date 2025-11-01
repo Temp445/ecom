@@ -10,7 +10,6 @@ const addressSchema = new mongoose.Schema({
     LandMark: {type: String},
     State: {type: String},
     Country: {type: String},
-    AltPhoneNumber: {type: Number}
 },
 { timestamps: true }
 )

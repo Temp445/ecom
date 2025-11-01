@@ -5,8 +5,8 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthProvider";
-import { CreditCard, MapPin, ShoppingCart, User } from "lucide-react";
-import CheckoutLogin from "./CheckoutLogin";
+import { CreditCard, MapPin, ShoppingCart, User, LockKeyhole ,MoveRight } from "lucide-react";
+import CheckoutLogin from "./CheckoutAuth";
 import CheckoutAddress from "./CheckoutAddress";
 import OrderSummary from "./OrderSummary";
 import Payment from "./Payment";
@@ -26,7 +26,13 @@ export type AddressType = {
 export type CartItem = {
   _id?: string;
   productId?:
-    | { _id: string; name?: string; price?: number; thumbnail?: string }
+    | {
+        _id: string;
+        name?: string;
+        price?: number;
+        thumbnail?: string;
+        stock?: number;
+      }
     | string;
   name?: string;
   image?: string;
@@ -39,13 +45,11 @@ export default function Checkout() {
   const { user } = useAuth();
 
   const [step, setStep] = useState<number>(1);
-  const [addresses, setAddresses] = useState<AddressType[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>("");
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "Online">("COD");
 
-  // Fetch data
   useEffect(() => {
     if (!user?._id) {
       setLoading(false);
@@ -61,11 +65,14 @@ export default function Checkout() {
         const addr =
           addrRes.data?.addresses || addrRes.data?.data || addrRes.data || [];
         const items =
-          cartRes.data?.cart?.items || cartRes.data?.items || cartRes.data || [];
+          cartRes.data?.cart?.items ||
+          cartRes.data?.items ||
+          cartRes.data ||
+          [];
 
-        setAddresses(addr);
         setCartItems(items);
-        if (addr.length && !selectedAddressId) setSelectedAddressId(addr[0]._id);
+        if (addr.length && !selectedAddressId)
+          setSelectedAddressId(addr[0]._id);
       } catch (e) {
         toast.error("Failed to load checkout data");
       } finally {
@@ -89,7 +96,8 @@ export default function Checkout() {
   );
 
   const goNext = () => {
-    if (step === 1 && !user?._id) return toast.error("Please login to continue");
+    if (step === 1 && !user?._id)
+      return toast.error("Please login to continue");
     if (step === 2 && !selectedAddressId)
       return toast.error("Please select a delivery address");
     if (step === 3 && !cartItems.length)
@@ -99,105 +107,209 @@ export default function Checkout() {
 
   const goBack = () => setStep((s) => Math.max(1, s - 1));
 
-  if (loading) return <div className="text-center py-20">Loading checkout...</div>;
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
 
   const handleIncrease = (id: string) => {
-  setCartItems((prev) =>
-    prev.map((item) =>
-      item._id === id ? { ...item, quantity: item.quantity + 1 } : item
-    )
-  );
-};
+    setCartItems((prev) =>
+      prev.map((item) =>
+        item._id === id ? { ...item, quantity: item.quantity + 1 } : item
+      )
+    );
+  };
 
-const handleDecrease = (id: string) => {
-  setCartItems((prev) =>
-    prev.map((item) =>
-      item._id === id && item.quantity > 1
-        ? { ...item, quantity: item.quantity - 1 }
-        : item
-    )
-  );
-};
+  const handleDecrease = (id: string) => {
+    setCartItems((prev) =>
+      prev.map((item) =>
+        item._id === id && item.quantity > 1
+          ? { ...item, quantity: item.quantity - 1 }
+          : item
+      )
+    );
+  };
 
-const handleRemove = (id: string) => {
-  setCartItems((prev) => prev.filter((item) => item._id !== id));
-};
+  const handleRemove = (id: string) => {
+    setCartItems((prev) => prev.filter((item) => item._id !== id));
+  };
 
+  const steps = [
+    { num: 1, label: "Login", icon: User },
+    { num: 2, label: "Address", icon: MapPin },
+    { num: 3, label: "Review", icon: ShoppingCart },
+    { num: 4, label: "Payment", icon: CreditCard },
+  ];
 
   return (
-    <div className="max-w-6xl mx-auto py-10 px-4">
-      <h1 className="text-3xl font-bold mb-6">Checkout</h1>
-
-      <div className="flex justify-between mb-8">
-        {["Login", "Address", "Summary", "Payment"].map((label, i) => (
-          <div key={label} className="flex flex-col items-center flex-1">
-            <div
-              className={`w-9 h-9 flex items-center justify-center rounded-full font-semibold ${
-                step === i + 1
-                  ? "bg-emerald-600 text-white"
-                  : step > i + 1
-                  ? "bg-emerald-100 text-emerald-600"
-                  : "bg-gray-200 text-gray-600"
-              }`}
-            >
-              {i + 1}
-            </div>
-            <p
-              className={`mt-2 text-sm ${
-                step === i + 1 ? "text-emerald-700" : "text-gray-500"
-              }`}
-            >
-              {label}
-            </p>
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-semibold text-gray-900">Checkout</h1>
           </div>
-        ))}
+        </div>
       </div>
 
-      <div className="bg-white p-6 rounded-xl shadow">
-        {step === 1 && <CheckoutLogin user={user} />}
-        {step === 2 && (
-          <CheckoutAddress
-            selectedAddressId={selectedAddressId}
-            onSelect={setSelectedAddressId}
-          />
-        )}
-        {step === 3 && <OrderSummary
-  cartItems={cartItems}
-  totalAmount={totalAmount}
-  onIncrease={handleIncrease}
-  onDecrease={handleDecrease}
-  onRemove={handleRemove}
-/>}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="mb-12">
+          <div className="flex items-center justify-between relative">
+            {/* Progress Line */}
+            <div className="absolute top-4 left-0 right-0 h-px bg-slate-200" />
+            <div
+              className="absolute top-4 left-0 h-px bg-slate-900 transition-all duration-500"
+              style={{ width: `${((step - 1) / 3) * 100}%` }}
+            />
 
-        {step === 4 && (
-          <Payment
-            user={user}
-            cartItems={cartItems}
-            selectedAddressId={selectedAddressId}
-            paymentMethod={paymentMethod}
-            setPaymentMethod={setPaymentMethod}
-            totalAmount={totalAmount}
-            router={router}
-          />
-        )}
-      </div>
+            {steps.map((s) => {
+              const Icon = s.icon;
+              const isActive = step === s.num;
+              const isCompleted = step > s.num;
 
-      <div className="mt-6 flex justify-between">
-        <button
-          onClick={goBack}
-          disabled={step === 1}
-          className="px-4 py-2 rounded border"
-        >
-          Back
-        </button>
-        {step < 4 && (
+              return (
+                <div
+                  key={s.num}
+                  className="flex flex-col items-center relative bg-white px-2"
+                >
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm transition-all ${
+                      isActive
+                        ? "bg-slate-900 text-white"
+                        : isCompleted
+                        ? "bg-slate-900 text-white"
+                        : "bg-white border border-slate-300 text-slate-400"
+                    }`}
+                  >
+                    <Icon size={16} />
+                  </div>
+                  <p
+                    className={`mt-2 text-xs ${
+                      isActive ? "text-slate-900 font-medium" : "text-slate-400"
+                    }`}
+                  >
+                    {s.label}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="flex justify-between items-center pb-8 ">
           <button
-            onClick={goNext}
-            className="px-4 py-2 rounded bg-emerald-600 text-white"
+            onClick={goBack}
+            disabled={step === 1}
+            className={`text-sm  flex gap-2 font-medium transition-colors ${
+              step === 1
+                ? "text-slate-300 cursor-not-allowed"
+                : "text-slate-900 hover:text-slate-600"
+            }`}
           >
-            Next
+            <MoveRight  className=" h-5 w-5 rotate-180"/> Back
           </button>
-        )}
+
+          {step < 4 && (
+            <button
+              onClick={goNext}
+              className="px-6 py-2.5 bg-emerald-600  rounded flex gap-2 text-white text-sm font-medium transition-colors"
+            >
+              Continue <MoveRight  className="w-5 h-5"/>
+            </button>
+          )}
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-lg border border-gray-200 p-">
+              <div>
+                {step === 1 && <CheckoutLogin user={user} />}
+                {step === 2 && (
+                  <CheckoutAddress
+                    selectedAddressId={selectedAddressId}
+                    onSelect={setSelectedAddressId}
+                  />
+                )}
+                {step === 3 && (
+                  <OrderSummary
+                    cartItems={cartItems}
+                    totalAmount={totalAmount}
+                    onIncrease={handleIncrease}
+                    onDecrease={handleDecrease}
+                    onRemove={handleRemove}
+                  />
+                )}
+                {step === 4 && (
+                  <Payment
+                    user={user}
+                    cartItems={cartItems}
+                    selectedAddressId={selectedAddressId}
+                    paymentMethod={paymentMethod}
+                    setPaymentMethod={setPaymentMethod}
+                    totalAmount={totalAmount}
+                    router={router}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-6 shadow-sm">
+              <h3 className="text-lg font-bold text-gray-900 mb-5 pb-3 border-b border-gray-200">
+                Price Details
+              </h3>
+
+              <div className="space-y-4 mb-5">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 text-sm">
+                    Price ({cartItems.length}{" "}
+                    {cartItems.length === 1 ? "item" : "items"})
+                  </span>
+                  <span className="font-semibold font-sans text-gray-900">
+                    ₹{totalAmount.toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 text-sm">Items</span>(
+                  {cartItems.length} {cartItems.length === 1 ? "item" : "items"}
+                  )
+                </div>
+              </div>
+
+              <div className="pt-4 border-t-2 border-gray-300 mb-5">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-900 font-bold text-base">
+                    Total Amount
+                  </span>
+                  <span className="text-2xl font-bold font-sans text-gray-900">
+                    ₹{totalAmount.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+           
+
+              <div className="bg-emerald-50 border border-emerald-500  rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                 <LockKeyhole className="text-emerald-700" />
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-900">
+                      Safe & Secure
+                    </p>
+                    <p className="text-xs text-emerald-700 mt-0.5">
+                      100% secure payments
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

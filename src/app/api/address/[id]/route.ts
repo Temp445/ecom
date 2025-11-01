@@ -9,7 +9,7 @@ export async function GET(req: Request, { params }: { params: Promise <{ id: str
 
     const { id } = await params
 
-    const address = await Address.findById(id);
+    const address = await Address.findById(id).sort({ createdAt: -1 });
     if (!address) {
       return NextResponse.json(
         { success: false, message: "Address not found" },
