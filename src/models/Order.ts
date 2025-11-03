@@ -15,17 +15,10 @@ const orderSchema = new mongoose.Schema(
           ref: "Product",
           required: true,
         },
-        productName: String, // snapshot of product name
-        productImage: String, // snapshot of image
-        quantity: {
-          type: Number,
-          required: true,
-          min: 1,
-        },
-        priceAtPurchase: {
-          type: Number,
-          required: true,
-        }
+        productName: { type: String, required: true },
+        productImage: { type: String }, 
+        quantity: { type: Number, required: true, min: 1 },
+        priceAtPurchase: { type: Number, required: true },
       },
     ],
 
@@ -35,22 +28,19 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
 
-    totalAmount: {
-      type: Number,
-      required: true,
-    },
+    totalAmount: { type: Number, required: true },
 
     paymentMethod: {
       type: String,
       enum: ["COD", "Online"],
       default: "COD",
     },
-
     paymentStatus: {
       type: String,
       enum: ["Paid", "Pending", "Failed"],
       default: "Pending",
     },
+    transactionId: { type: String },
 
     orderStatus: {
       type: String,
@@ -58,8 +48,16 @@ const orderSchema = new mongoose.Schema(
       default: "Processing",
     },
 
-    transactionId: String,
-    deliveredAt: Date,
+    orderDate: {
+      type: Date,
+      default: Date.now,
+    },
+    deliveryDate: {
+      type: Date, 
+    },
+    deliveredAt: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );

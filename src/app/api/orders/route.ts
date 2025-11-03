@@ -7,6 +7,32 @@ import User from "@/models/User";
 import mongoose from "mongoose";
 
 
+export async function GET(req: Request) {
+  try {
+    await dbConnect();
+
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get("userId");
+
+    let query = {};
+    if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+      query = { userId };
+    }
+
+    const orders = await Order.find(query)
+      .sort({ createdAt: -1 });
+
+    return NextResponse.json({ success: true, data: orders }, { status: 200 });
+  } catch (error: any) {
+    console.error("Error fetching orders:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to fetch orders" },
+      { status: 500 }
+    );
+  }
+}
+
+
 export async function POST(req: Request) {
   try {
     await dbConnect();
@@ -78,29 +104,5 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
-  try {
-    await dbConnect();
-
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-
-    let query = {};
-    if (userId && mongoose.Types.ObjectId.isValid(userId)) {
-      query = { userId };
-    }
-
-    const orders = await Order.find(query)
-      .sort({ createdAt: -1 });
-
-    return NextResponse.json({ success: true, data: orders }, { status: 200 });
-  } catch (error: any) {
-    console.error("Error fetching orders:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to fetch orders" },
-      { status: 500 }
-    );
-  }
-}
 
 

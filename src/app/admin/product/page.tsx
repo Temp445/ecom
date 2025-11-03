@@ -75,12 +75,12 @@ export default function ProductDisplayPage() {
               key={product._id}
               className="bg-white border rounded-xl shadow-sm hover:shadow-md transition p-4 flex flex-col"
             >
-              <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 mb-3">
+              <div className="aspect-square rounded-lg overflow-hidden bg-white mb-3">
                 {product.thumbnail ? (
                   <img
                     src={product.thumbnail}
                     alt={product.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-gray-400">
@@ -98,15 +98,15 @@ export default function ProductDisplayPage() {
 
               <div className="mt-auto">
                 <div className="flex justify-between items-center">
-                  <div>
+                  <div className="flex gap-3 items-center">
                     <p className="text-slate-800 font-semibold">
                       ₹
                       {product.discountPrice
                         ? product.discountPrice.toLocaleString()
                         : product.price?.toLocaleString()}
                     </p>
-                    {product.discountPrice && (
-                      <p className="text-gray-400 text-sm line-through">
+                    {product.discountPrice > 0 && (
+                      <p className="text-gray-600 text-xs line-through">
                         ₹{product.price?.toLocaleString()}
                       </p>
                     )}
@@ -114,7 +114,6 @@ export default function ProductDisplayPage() {
 
                 </div>
 
-                {/* Actions */}
                 <div className="flex justify-end gap-2 mt-3">
                   <Link
                     href={`/admin/product/update/${product.pathUrl}`}

@@ -7,9 +7,10 @@ import { Package, Clock, CreditCard, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 type OrderItem = {
+  priceAtPurchase: number;
   productId: string;
-  name: string;
-  image: string;
+  productName: string;
+  productImage: string;
   quantity: number;
   price: number;
 };
@@ -17,7 +18,7 @@ type OrderItem = {
 type Order = {
   _id: string;
   userId: string;
-  orderDate: string;
+  deliveryDate: string;
   totalAmount: number;
   paymentMethod: string;
   status: string;
@@ -29,19 +30,21 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchOrders = async (userId: string) => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`/api/orders?userId=${userId}`);
+      // ✅ Adjust this line based on actual API response
+      setOrders(res.data.data || res.data.orders || []);
+    } catch {
+      toast.error("Failed to load orders");
+    } finally {
+      setLoading(false); 
+    }
+  };
+
   useEffect(() => {
-    const fetchOrders = async (userId: string) => {
-      if (!user?._id) return;
-      try {
-        const res = await axios.get(`/api/orders?userId=${userId}`);
-        setOrders(res.data.orders || []);
-      } catch (error) {
-        console.error(error);
-        toast.error("Failed to load your orders");
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (user?._id) fetchOrders(user._id);
   }, [user]);
 
   if (loading) {
@@ -57,7 +60,9 @@ export default function OrdersPage() {
       <div className="text-center py-20 text-gray-600">
         <Package className="mx-auto mb-4 text-gray-400" size={48} />
         <p className="text-lg font-medium">No orders found</p>
-        <p className="text-sm text-gray-500">Once you make a purchase, it will appear here.</p>
+        <p className="text-sm text-gray-500">
+          Once you make a purchase, it will appear here.
+        </p>
       </div>
     );
   }
@@ -80,7 +85,13 @@ export default function OrdersPage() {
                   <span className="font-medium">Order ID:</span> {order._id}
                 </p>
                 <p className="text-gray-600 flex items-center gap-1">
-                  <Clock size={16} /> {new Date(order.orderDate).toLocaleString()}
+                  <Clock size={16} />{" "}
+                 {new Date(order.deliveryDate).toLocaleDateString("en-IN", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  })}
+
                 </p>
               </div>
 
@@ -109,18 +120,18 @@ export default function OrdersPage() {
               {order.items.map((item, idx) => (
                 <div key={idx} className="flex items-center gap-3">
                   <img
-                    src={item.image}
-                    alt={item.name}
+                    src={item.productImage}
+                    alt={item.productName}
                     className="w-16 h-16 rounded-lg object-cover border"
                   />
                   <div className="flex-1">
-                    <p className="font-medium text-gray-800">{item.name}</p>
+                    <p className="font-medium text-gray-800">{item.productName}</p>
                     <p className="text-sm text-gray-500">
-                      Qty: {item.quantity} × ₹{item.price}
+                      Qty: {item.quantity} × ₹{item.priceAtPurchase}
                     </p>
                   </div>
                   <p className="font-semibold text-gray-700">
-                    ₹{(item.price * item.quantity).toLocaleString()}
+                    ₹{(item.priceAtPurchase * item.quantity).toLocaleString()}
                   </p>
                 </div>
               ))}

@@ -77,7 +77,6 @@ const HeroSection = () => {
         )}
       </AnimatePresence>
 
-      {/* Slider Dots */}
       <div className="absolute h-full items-center justify-center mx-auto right-5  flex flex-col space-y-2">
         {slides.map((_, idx) => (
           <button

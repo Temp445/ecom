@@ -55,11 +55,10 @@ export async function DELETE(req: Request, { params }: { params: Promise <{ id: 
         { status: 404 }
       );
 
-    cart.items = cart.items.filter(
-      (item: any) => item._id.toString() !== id
+       await Cart.updateOne(
+      { _id: cart._id },
+      { $pull: { items: { _id: id } } }
     );
-
-    await cart.save();
 
     return NextResponse.json({ success: true, message: "Item removed" });
   } catch (error: any) {

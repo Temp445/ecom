@@ -119,19 +119,16 @@ export default function ProductsPage() {
             clearFilters={clearFilters}
           />
 
-          {/* Main Product Section */}
           <main className="flex-1">
-            {/* ===== Top Bar with Search & View Toggle ===== */}
             <div className="flex flex-wrap items-center justify-between mb-6 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-           <div>Products</div>
+           <div className="text-xl font-medium"> Our Products</div>
 
-              {/* View Toggle Buttons */}
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setViewMode("grid")}
                   className={`p-2 rounded-lg border ${
                     viewMode === "grid"
-                      ? "bg-blue-600 text-white border-blue-600"
+                      ? "bg-gray-900 text-white border-gray-900"
                       : "bg-white text-slate-600 border-slate-300 hover:bg-slate-100"
                   }`}
                   title="Grid View"
@@ -153,7 +150,6 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            {/* ===== Product Grid/List ===== */}
             <div
               className={
                 viewMode === "grid"

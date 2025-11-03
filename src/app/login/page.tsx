@@ -3,24 +3,22 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
+import toast from "react-hot-toast";
+
 
 const LoginPage = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
-  // 📩 Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // 🚀 Handle login submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
 
     try {
       const res = await fetch("/api/auth/user-login", {
@@ -32,7 +30,7 @@ const LoginPage = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(
+        toast.error(
           data.error === "Invalid email or password"
             ? "Incorrect email or password. Please try again."
             : data.error || "Login failed. Please try again."
@@ -40,13 +38,13 @@ const LoginPage = () => {
         return;
       }
 
-      // ✅ Store user data
+      //  Store user data
       localStorage.setItem("token", data.token);
       localStorage.setItem("userId", data.user._id);
       localStorage.setItem("role", data.user.role);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      // 🛒 Merge guest cart into user cart (if exists)
+      //  Merge guest cart into user cart (if exists)
       const guestCart = JSON.parse(localStorage.getItem("guestCart") || "[]");
 
       if (guestCart.length > 0) {
@@ -65,26 +63,23 @@ const LoginPage = () => {
             }),
           });
 
-          // 🧹 Clear guest cart after merging
+          // Clear guest cart after merging
           localStorage.removeItem("guestCart");
         } catch (err) {
           console.error("Cart merge error:", err);
         }
       }
 
-      // 🔔 Notify CartProvider to refresh instantly
       window.dispatchEvent(new Event("cartUpdated"));
       window.dispatchEvent(new Event("userLogin"));
 
-      // 🔀 Redirect based on role
       if (data.user.role === "admin") {
         router.push("/admin");
       } else {
         router.push("/");
       }
     } catch (err) {
-      console.error("Login error:", err);
-      setError("Something went wrong. Please try again later.");
+      toast.error("Something went wrong. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -97,8 +92,6 @@ const LoginPage = () => {
           Login
         </h1>
 
-        {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block mb-1 font-medium text-gray-700">Email</label>
@@ -108,7 +101,7 @@ const LoginPage = () => {
               autoComplete="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full border border-gray-300 px-3 py-2 rounded focus:ring-2 focus:ring-emerald-500 outline-none"
+              className="w-full border border-gray-300 px-3 py-2 rounded focus:border-gray-600 outline-none"
               required
             />
           </div>
@@ -123,7 +116,7 @@ const LoginPage = () => {
               value={formData.password}
               onChange={handleChange}
               autoComplete="current-password"
-              className="w-full border border-gray-300 px-3 py-2 rounded focus:ring-2 focus:ring-emerald-500 outline-none"
+              className="w-full border border-gray-300 px-3 py-2 rounded outline-none focus:border-gray-600"
               required
             />
             <button

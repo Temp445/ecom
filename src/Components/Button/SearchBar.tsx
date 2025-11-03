@@ -88,15 +88,12 @@ export default function SearchBar() {
                   className="p-3 hover:bg-gray-50 transition-colors cursor-pointer group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
+                    <div className="flex-shrink-0 w-16 h-16 bg-white rounded-lg overflow-hidden">
                       <img 
                         src={item.thumbnail || item.images?.[0]} 
                         alt={item.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect fill="%23f3f4f6" width="100" height="100"/%3E%3Ctext x="50" y="50" font-size="40" text-anchor="middle" dy=".3em" fill="%239ca3af"%3E?%3C/text%3E%3C/svg%3E';
-                        }}
+                        className="w-full h-full object-contain"
+                    
                       />
                     </div>
                     

@@ -1,10 +1,28 @@
 "use client";
+
 import React, { useState } from "react";
-import { CreditCard, Loader2, Wallet, Banknote, ShieldCheck, CheckCircle2 } from "lucide-react";
+import {
+  CreditCard,
+  Loader2,
+  Wallet,
+  Banknote,
+  ShieldCheck,
+  CheckCircle2,
+} from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { CartItem } from "./Checkout";
+
+interface PaymentProps {
+  user: any;
+  cartItems: CartItem[];
+  selectedAddressId: string;
+  paymentMethod: "COD" | "Online";
+  setPaymentMethod: (m: "COD" | "Online") => void;
+  totalAmount: number;
+  router: ReturnType<typeof useRouter>;
+}
 
 export default function Payment({
   user,
@@ -14,24 +32,22 @@ export default function Payment({
   setPaymentMethod,
   totalAmount,
   router,
-}: {
-  user: any;
-  cartItems: CartItem[];
-  selectedAddressId: string;
-  paymentMethod: "COD" | "Online";
-  setPaymentMethod: (m: "COD" | "Online") => void;
-  totalAmount: number;
-  router: ReturnType<typeof useRouter>;
-}) {
+}: PaymentProps) {
   const [placingOrder, setPlacingOrder] = useState(false);
 
+  /** 🧾 Handle Place Order */
   const handlePlaceOrder = async () => {
-    if (!user?._id) return toast.error("Login required");
-    if (!selectedAddressId) return toast.error("Select an address");
-    if (!cartItems.length) return toast.error("Cart is empty");
+    if (!user?._id) return toast.error("Please login to continue");
+    if (!selectedAddressId) return toast.error("Please select a delivery address");
+    if (!cartItems.length) return toast.error("Your cart is empty");
 
     setPlacingOrder(true);
     try {
+      const orderDate = new Date();
+      const deliveryDate = new Date();
+      deliveryDate.setDate(orderDate.getDate() + 5); // Expected delivery in 5 days
+
+      // ✅ Build order payload matching Order model
       const payload = {
         userId: user._id,
         items: cartItems.map((it) => ({
@@ -39,6 +55,12 @@ export default function Payment({
             typeof it.productId === "string"
               ? it.productId
               : it.productId?._id,
+          productName:
+            it.name ??
+            (typeof it.productId === "object" ? it.productId.name : "Product"),
+          productImage:
+            it.image ??
+            (typeof it.productId === "object" ? it.productId.thumbnail : ""),
           quantity: Number(it.quantity),
           priceAtPurchase:
             typeof it.price === "number"
@@ -51,21 +73,32 @@ export default function Payment({
         totalAmount,
         paymentMethod,
         paymentStatus: paymentMethod === "Online" ? "Paid" : "Pending",
+        transactionId:
+          paymentMethod === "Online"
+            ? `TXN-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+            : undefined,
         orderStatus: "Processing",
+        orderDate,
+        deliveryDate,
       };
 
       const res = await axios.post("/api/orders", payload);
+
       if (res.status === 201 || res.data?.success) {
-        toast.success("Order placed successfully");
+        toast.success("Order placed successfully 🎉");
         router.push("/orders/success");
-      } else toast.error(res.data?.error || "Failed to place order");
+      } else {
+        toast.error(res.data?.error || "Failed to place order");
+      }
     } catch (err: any) {
+      console.error("Order placement error:", err);
       toast.error(err?.response?.data?.error || "Order creation failed");
     } finally {
       setPlacingOrder(false);
     }
   };
 
+  /** 💳 Payment options */
   const paymentOptions = [
     {
       id: "Online",
@@ -78,7 +111,7 @@ export default function Payment({
     {
       id: "COD",
       title: "Cash on Delivery",
-      description: "Pay when you receive",
+      description: "Pay when you receive the product",
       icon: Banknote,
       badge: "Available",
       badgeColor: "bg-emerald-100 text-emerald-700",
@@ -86,18 +119,19 @@ export default function Payment({
   ];
 
   return (
-    <section className="space-y-6 p-4">
+    <section className="space-y-6 p-4 bg-white rounded-2xl shadow-sm">
       {/* Header */}
       <div className="flex items-center gap-3 pb-4 border-b border-gray-200">
         <div className="bg-emerald-500 p-2.5 rounded-lg">
           <CreditCard className="text-white w-5 h-5" />
         </div>
         <div>
-          <h2 className="text-xl  text-gray-900">Payment Method</h2>
-          <p className="text-sm text-gray-500">Choose how you'd like to pay</p>
+          <h2 className="text-xl font-semibold text-gray-900">Payment Method</h2>
+          <p className="text-sm text-gray-500">Choose how you’d like to pay</p>
         </div>
       </div>
 
+      {/* Payment options */}
       <div className="grid sm:grid-cols-2 gap-4">
         {paymentOptions.map((option) => {
           const Icon = option.icon;
@@ -123,7 +157,9 @@ export default function Payment({
                 name="payment"
                 value={option.id}
                 checked={isSelected}
-                onChange={() => setPaymentMethod(option.id as "COD" | "Online")}
+                onChange={() =>
+                  setPaymentMethod(option.id as "COD" | "Online")
+                }
                 className="sr-only"
               />
 
@@ -144,12 +180,16 @@ export default function Payment({
                   <div className="flex items-center gap-2 mb-1">
                     <h3
                       className={`font-bold text-base ${
-                        isSelected ? "text-black" : "text-gray-900"
+                        isSelected ? "text-emerald-900" : "text-gray-900"
                       }`}
                     >
                       {option.title}
                     </h3>
-                  
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full font-medium ${option.badgeColor}`}
+                    >
+                      {option.badge}
+                    </span>
                   </div>
                   <p
                     className={`text-sm ${
@@ -165,8 +205,6 @@ export default function Payment({
         })}
       </div>
 
-     
-
       <div className="flex items-center justify-center gap-2 text-sm text-gray-600 bg-emerald-50 border border-emerald-200 rounded-lg py-3 px-4">
         <ShieldCheck className="w-5 h-5 text-emerald-600" />
         <span>Your payment information is secure and encrypted</span>
@@ -178,7 +216,7 @@ export default function Payment({
         className={`w-full py-4 rounded-xl text-white font-bold text-lg transition-all flex items-center justify-center gap-2 ${
           placingOrder
             ? "bg-gray-400 cursor-not-allowed"
-            : "bg-emerald-600 shadow-lg hover:shadow-xl"
+            : "bg-emerald-600 hover:bg-emerald-700 shadow-lg hover:shadow-xl"
         }`}
       >
         {placingOrder ? (
@@ -186,24 +224,18 @@ export default function Payment({
             <Loader2 className="w-5 h-5 animate-spin" />
             Processing Order...
           </>
+        ) : paymentMethod === "Online" ? (
+          <>
+            <Wallet className="w-5 h-5" />
+            Pay ₹{totalAmount.toFixed(2)} & Place Order
+          </>
         ) : (
           <>
-            {paymentMethod === "Online" ? (
-              <>
-                <Wallet className="w-5 h-5" />
-                Pay ₹{totalAmount.toFixed(2)} & Place Order
-              </>
-            ) : (
-              <>
-                <Banknote className="w-5 h-5" />
-                Place Order (COD)
-              </>
-            )}
+            <Banknote className="w-5 h-5" />
+            Place Order (COD)
           </>
         )}
       </button>
-
-   
     </section>
   );
 }

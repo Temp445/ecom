@@ -1,13 +1,65 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
-import { Loader2, Upload, X, Image as ImageIcon, Plus } from "lucide-react";
-import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import {
+  Loader2,
+  Upload,
+  X,
+  Plus,
+  Package,
+  IndianRupee ,
+  Truck,
+  FileImage,
+  Wrench,
+} from "lucide-react";
 
-const ProductUploadPage = () => {
-  const [formData, setFormData] = useState({
+interface Category {
+  _id: string;
+  Name: string;
+}
+
+interface TechnicalDetails {
+  boreDiameter: string;
+  rodDiameter: string;
+  strokeLength: string;
+  mountingType: string;
+  workingPressure: string;
+  material: string;
+  sealType: string;
+  application: string;
+}
+
+interface Benefit {
+  title: string;
+  description: string;
+}
+
+interface FormDataState {
+  name: string;
+  description: string;
+  model: string;
+  brand: string;
+  category: string;
+  price: string;
+  discountPrice: string;
+  stock: string;
+  deliveryCharge: string;
+  deliveryDate: string;
+  isNewArrival: boolean;
+  isActive: boolean;
+}
+
+interface ErrorState {
+  [key: string]: string | undefined;
+}
+
+const ProductUploadPage: React.FC = () => {
+  const router = useRouter();
+
+  const [formData, setFormData] = useState<FormDataState>({
     name: "",
     description: "",
     model: "",
@@ -16,49 +68,125 @@ const ProductUploadPage = () => {
     price: "",
     discountPrice: "",
     stock: "",
+    deliveryCharge: "",
+    deliveryDate: "",
+    isNewArrival: false,
+    isActive: true,
   });
 
-  const [categories, setCategories] = useState<any[]>([]);
+  const [technicalDetails, setTechnicalDetails] = useState<TechnicalDetails>({
+    boreDiameter: "",
+    rodDiameter: "",
+    strokeLength: "",
+    mountingType: "",
+    workingPressure: "",
+    material: "",
+    sealType: "",
+    application: "",
+  });
+
+  const [benefits, setBenefits] = useState<Benefit[]>([
+    { title: "", description: "" },
+  ]);
+
+  const [categories, setCategories] = useState<Category[]>([]);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [errors, setErrors] = useState<ErrorState>({});
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
-  // ✅ Fetch categories for dropdown
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const { data } = await axios.get("/api/category");
-        setCategories(data.data || []);
-      } catch {
-        toast.error("Failed to load categories");
-      }
-    };
     fetchCategories();
   }, []);
 
-  // ✅ Handle input change
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  // ✅ Handle thumbnail upload
-  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setThumbnail(file);
-      setThumbnailPreview(URL.createObjectURL(file));
+  const fetchCategories = async () => {
+    try {
+      const { data } = await axios.get("/api/category");
+      setCategories(data.data || []);
+    } catch {
+      toast.error("Failed to load categories");
     }
   };
 
-  // ✅ Handle gallery upload
-  const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const validateForm = (): boolean => {
+    const newErrors: ErrorState = {};
+    if (!formData.name.trim()) newErrors.name = "Product name is required";
+    if (!formData.description.trim())
+      newErrors.description = "Description is required";
+    if (!formData.category) newErrors.category = "Category is required";
+    if (!formData.price || parseFloat(formData.price) <= 0)
+      newErrors.price = "Valid price is required";
+    if (!formData.stock || parseInt(formData.stock) < 0)
+      newErrors.stock = "Valid stock quantity is required";
+    if (
+      formData.discountPrice &&
+      parseFloat(formData.discountPrice) >= parseFloat(formData.price)
+    )
+      newErrors.discountPrice = "Discount price must be less than price";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: undefined }));
+  };
+
+  const handleTechChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setTechnicalDetails((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleBenefitChange = (
+    index: number,
+    field: keyof Benefit,
+    value: string
+  ) => {
+    const updated = [...benefits];
+    updated[index][field] = value;
+    setBenefits(updated);
+  };
+
+  const addBenefit = () =>
+    setBenefits((prev) => [...prev, { title: "", description: "" }]);
+
+  const removeBenefit = (index: number) =>
+    setBenefits((prev) => prev.filter((_, i) => i !== index));
+
+  const handleThumbnailChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/"))
+      return toast.error("Invalid image file");
+    if (file.size > 5 * 1024 * 1024)
+      return toast.error("Thumbnail size < 5MB only");
+    setThumbnail(file);
+    setThumbnailPreview(URL.createObjectURL(file));
+  };
+
+  const handleImagesChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const newFiles = [...images, ...files];
-    setImages(newFiles);
-    setImagePreviews(newFiles.map((file) => URL.createObjectURL(file)));
+    const valid = files.filter((f) => f.type.startsWith("image/"));
+    if (images.length + valid.length > 10)
+      return toast.error("Max 10 gallery images allowed");
+    setImages((prev) => [...prev, ...valid]);
+    setImagePreviews((prev) => [
+      ...prev,
+      ...valid.map((f) => URL.createObjectURL(f)),
+    ]);
   };
 
   const removeThumbnail = () => {
@@ -67,112 +195,110 @@ const ProductUploadPage = () => {
   };
 
   const removeImage = (index: number) => {
-    const newFiles = images.filter((_, i) => i !== index);
-    setImages(newFiles);
-    setImagePreviews(newFiles.map((f) => URL.createObjectURL(f)));
+    setImages((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // ✅ Submit product
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
-    if (!formData.name || !formData.description || !formData.category || !formData.price || !formData.stock) {
-      toast.error("Please fill all required fields");
-      return;
-    }
+    if (!validateForm()) return toast.error("Fix all errors before submitting");
+    setLoading(true);
 
     try {
-      setLoading(true);
-
       const data = new FormData();
-      Object.entries(formData).forEach(([key, value]) => data.append(key, value));
+      Object.entries(formData).forEach(([key, value]) =>
+        data.append(key, String(value))
+      );
+
+      data.append("technicalDetails", JSON.stringify(technicalDetails));
+      data.append("benefits", JSON.stringify(benefits));
+
       if (thumbnail) data.append("thumbnail", thumbnail);
-      images.forEach((file) => data.append("images", file));
+      images.forEach((img) => data.append("images", img));
 
-      await axios.post("/api/product", data);
-
-      toast.success("Product uploaded successfully");
-      setFormData({
-        name: "",
-        description: "",
-        model: "",
-        brand: "",
-        category: "",
-        price: "",
-        discountPrice: "",
-        stock: "",
+      await axios.post("/api/product", data, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
-      setThumbnail(null);
-      setImages([]);
-      setThumbnailPreview(null);
-      setImagePreviews([]);
-      router.push("/admin/product");
 
+      toast.success("Product uploaded successfully!");
+      router.push("/admin/product");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to upload product");
+      console.error(error);
+      toast.error(error.response?.data?.message || "Upload failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white/50 py-12 px-4">
-      <div className="bg-white shadow-2xl rounded-3xl p-8 w-full max-w-3xl border border-gray-100">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Upload Product</h1>
-          <p className="text-gray-500 text-sm">Add a new product with images and details</p>
-        </div>
+    <div className="min-h-screen bg-gray-50 py-10 px-4">
+      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-lg p-8">
+        <h1 className="text-3xl  mb-8 text-gray-800">
+           Upload New Product
+        </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Name and Brand */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Product Name *</label>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <section className="border border-gray-300 p-6 rounded-xl space-y-4">
+            <h2 className="flex items-center gap-2 text-xl font-semibold text-gray-900 mb-3">
+              <Package className="w-6 h-6" /> Basic Information
+            </h2>
+
+            <div className="space-y-3">
+              <label className="font-medium text-gray-700">Product Name</label>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-1 outline-none text-gray-800"
+                className="w-full border border-gray-300 rounded-lg p-3"
                 placeholder="Enter product name"
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Brand</label>
-              <input
-                type="text"
-                name="brand"
-                value={formData.brand}
+            <div className="space-y-3">
+              <label className="font-medium text-gray-700">Description</label>
+              <textarea
+                name="description"
+                value={formData.description}
                 onChange={handleChange}
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-1 outline-none text-gray-800"
-                placeholder="Enter brand name"
+                placeholder="Enter detailed description"
+                className="w-full border border-gray-300 rounded-lg p-3 resize-none"
+                rows={4}
               />
             </div>
-          </div>
 
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Description *</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-1 outline-none text-gray-800"
-              rows={3}
-              placeholder="Enter product description"
-            />
-          </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="font-medium text-gray-700">Brand</label>
+                <input
+                  type="text"
+                  name="brand"
+                  value={formData.brand}
+                  onChange={handleChange}
+                  className="border border-gray-300 rounded-lg p-3 w-full"
+                  placeholder="Enter brand name"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="font-medium text-gray-700">Model</label>
+                <input
+                  type="text"
+                  name="model"
+                  value={formData.model}
+                  onChange={handleChange}
+                  className="border border-gray-300 rounded-lg p-3 w-full"
+                  placeholder="Enter model number"
+                />
+              </div>
+            </div>
 
-          {/* Category, Model */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Category *</label>
+            <div className="space-y-2">
+              <label className="font-medium text-gray-700">Category</label>
               <select
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-1 outline-none text-gray-800"
+                className="border border-gray-300 rounded-lg p-3 w-full"
               >
                 <option value="">Select Category</option>
                 {categories.map((cat) => (
@@ -182,120 +308,248 @@ const ProductUploadPage = () => {
                 ))}
               </select>
             </div>
+          </section>
+
+          <section className="border border-gray-300 p-6 rounded-xl space-y-4">
+            <h2 className="flex items-center gap-2 text-xl font-semibold text-gray-900">
+              <IndianRupee  className="w-5 h-5" /> Pricing & Stock
+            </h2>
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { name: "price", label: "Price (₹)" },
+                { name: "discountPrice", label: "Discount Price (₹)" },
+                { name: "stock", label: "Stock Quantity" },
+              ].map((field) => (
+                <div key={field.name} className="space-y-2">
+                  <label className="font-medium text-gray-700">
+                    {field.label}
+                  </label>
+                  <input
+                    type="number"
+                    name={field.name}
+                    value={(formData as any)[field.name]}
+                    onChange={handleChange}
+                    className="border  border-gray-300 rounded-lg p-3 w-full no-spinner"
+                    placeholder={`Enter ${field.label}`}
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="border border-gray-300 p-6 rounded-xl space-y-4">
+            <h2 className="flex items-center gap-2 text-xl font-semibold text-gray-900">
+              <Wrench className="w-6 h-6" /> Technical Details
+            </h2>
+            <div className="grid grid-cols-2 gap-4">
+              {Object.entries(technicalDetails).map(([key, value]) => (
+                <div key={key} className="space-y-2">
+                  <label className="font-medium text-gray-700 capitalize">
+                    {key.replace(/([A-Z])/g, " $1")}
+                  </label>
+                  <input
+                    name={key}
+                    value={value}
+                    onChange={handleTechChange}
+                    className="w-full border border-gray-300 rounded-lg p-3"
+                    placeholder={`Enter ${key.replace(/([A-Z])/g, " $1")}`}
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="border border-gray-300 p-6 rounded-xl space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-800">
+                Product Benefits
+              </h2>
+              <button
+                type="button"
+                onClick={addBenefit}
+                className="text-blue-600 flex items-center gap-1"
+              >
+                <Plus className="w-4 h-4" /> Add Benefit
+              </button>
+            </div>
+            {benefits.map((b, i) => (
+              <div key={i} className="flex gap-3">
+                <div className="flex-1 space-y-2">
+                  <label className="font-medium text-gray-700">Title</label>
+                  <input
+                    type="text"
+                    value={b.title}
+                    onChange={(e) =>
+                      handleBenefitChange(i, "title", e.target.value)
+                    }
+                    className="w-full border border-gray-300 rounded-lg p-3"
+                    placeholder="Benefit title"
+                  />
+                  <label className="font-medium text-gray-700">
+                    Description
+                  </label>
+                  <textarea
+                    value={b.description}
+                    onChange={(e) =>
+                      handleBenefitChange(i, "description", e.target.value)
+                    }
+                    className="w-full border border-gray-300 rounded-lg p-3 resize-none"
+                    rows={2}
+                    placeholder="Benefit description"
+                  />
+                </div>
+                {benefits.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeBenefit(i)}
+                    className="text-red-600 hover:text-red-800 mt-8"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </section>
+
+          <section className="border border-gray-300 p-6 rounded-xl grid grid-cols-2 gap-6">
+            <div>
+              <h2 className="font-semibold mb-2 text-gray-800">Thumbnail</h2>
+              {!thumbnailPreview ? (
+                <label className="border-dashed border-2 border-gray-300 rounded-lg p-6 flex flex-col items-center cursor-pointer hover:bg-blue-50 transition">
+                  <FileImage className="w-10 h-10 text-gray-400" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleThumbnailChange}
+                  />
+                  <span className="text-sm text-gray-600 mt-2">
+                    Upload Thumbnail
+                  </span>
+                </label>
+              ) : (
+                <div className="relative">
+                  <img
+                    src={thumbnailPreview}
+                    alt="Thumbnail"
+                    className="rounded-lg border w-full object-contain h-44"
+                  />
+                  <button
+                    type="button"
+                    onClick={removeThumbnail}
+                    className="absolute top-2 right-2 bg-white text-red-600 rounded-full p-1 shadow"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Model</label>
-              <input
-                type="text"
-                name="model"
-                value={formData.model}
-                onChange={handleChange}
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-1 outline-none text-gray-800"
-                placeholder="Enter model name"
-              />
-            </div>
-          </div>
-
-          {/* Price, Discount, Stock */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Price *</label>
-              <input
-                type="number"
-                name="price"
-                value={formData.price}
-                onChange={handleChange}
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-1 outline-none text-gray-800"
-                placeholder="0.00"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Discount Price</label>
-              <input
-                type="number"
-                name="discountPrice"
-                value={formData.discountPrice}
-                onChange={handleChange}
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-1 outline-none text-gray-800"
-                placeholder="0.00"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Stock *</label>
-              <input
-                type="number"
-                name="stock"
-                value={formData.stock}
-                onChange={handleChange}
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-1 outline-none text-gray-800"
-                placeholder="Available stock"
-              />
-            </div>
-          </div>
-
-          {/* Thumbnail Upload */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Thumbnail Image</label>
-            {!thumbnailPreview ? (
-              <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-8 cursor-pointer hover:border-gray-500 hover:bg-blue-50 transition-all group">
-                <input type="file" name="thumbnail" accept="image/*" className="hidden" onChange={handleThumbnailChange} />
-                <ImageIcon className="w-8 h-8 text-gray-400 mb-3 group-hover:text-gray-900" />
-                <span className="text-sm font-medium text-gray-600">Click to upload thumbnail</span>
+              <h2 className="font-semibold mb-2 text-gray-800">
+                Gallery Images
+              </h2>
+              <label className="border-dashed border-2 border-gray-300 rounded-lg p-6 flex flex-col items-center cursor-pointer hover:bg-blue-50 transition">
+                <Plus className="w-8 h-8 text-gray-400" />
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImagesChange}
+                />
+                <span className="text-sm text-gray-600 mt-2">Add Images</span>
               </label>
-            ) : (
-              <div className="relative rounded-xl overflow-hidden border-2 border-gray-200 group">
-                <img src={thumbnailPreview} alt="Thumbnail" className="w-full h-48 object-cover" />
-                <button
-                  type="button"
-                  onClick={removeThumbnail}
-                  className="absolute top-2 right-2 bg-white text-red-600 rounded-full p-2 hover:bg-red-50 shadow"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+              {imagePreviews.length > 0 && (
+                <div className="grid grid-cols-3 gap-2 mt-3">
+                  {imagePreviews.map((src, i) => (
+                    <div key={i} className="relative">
+                      <img
+                        src={src}
+                        alt={`img-${i}`}
+                        className="rounded-lg border h-24 object-contain w-full"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(i)}
+                        className="absolute top-1 right-1 bg-white text-red-600 rounded-full p-1 shadow"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className=" p-4 rounded-xl space-y-4">
+            <h2 className="flex items-center gap-2 text-xl font-semibold text-gray-900">
+              <Truck className="w-6 h-6" /> Delivery & Status
+            </h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="font-medium text-gray-700">
+                  Delivery Charge 
+                </label>
+                <input
+                  type="number"
+                  name="deliveryCharge"
+                  value={formData.deliveryCharge}
+                  onChange={handleChange}
+                  className="border border-gray-300 rounded-lg p-3 w-full no-spinner"
+                  placeholder="Enter delivery charge"
+                />
               </div>
-            )}
-          </div>
-
-          {/* Gallery Upload */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Gallery Images</label>
-            <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-6 cursor-pointer hover:border-gray-500 hover:bg-blue-50 transition-all group">
-              <input multiple type="file" name="images" accept="image/*" className="hidden" onChange={handleImagesChange} />
-              <Plus className="w-8 h-8 text-gray-400 mb-2 group-hover:text-gray-900" />
-              <span className="text-sm text-gray-600">Add product images</span>
-            </label>
-
-            {imagePreviews.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                {imagePreviews.map((src, i) => (
-                  <div key={i} className="relative rounded-lg overflow-hidden border">
-                    <img src={src} alt="Preview" className="w-full h-28 object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(i)}
-                      className="absolute top-1 right-1 bg-white text-red-600 rounded-full p-1 shadow hover:bg-red-50"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
+              <div className="space-y-2">
+                <label className="font-medium text-gray-700">
+                  Delivery Days
+                </label>
+                <input
+                  type="number"
+                  name="deliveryDate"
+                  value={formData.deliveryDate}
+                  onChange={handleChange}
+                  className="border border-gray-300 rounded-lg p-3 w-full no-spinner"
+                  placeholder="Enter delivery days"
+                />
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* Submit Button */}
+            <div className="flex gap-4 mt-3">
+              <label className="flex items-center gap-2 text-gray-700">
+                <input
+                  type="checkbox"
+                  name="isNewArrival"
+                  checked={formData.isNewArrival}
+                  onChange={handleChange}
+                />
+                New Arrival
+              </label>
+              <label className="flex items-center gap-2 text-gray-700">
+                <input
+                  type="checkbox"
+                  name="isActive"
+                  checked={formData.isActive}
+                  onChange={handleChange}
+                />
+                Active Product
+              </label>
+            </div>
+          </section>
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-emerald-700 text-white py-3.5 rounded-xl flex items-center justify-center transition-all duration-200 font-semibold shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-lg font-semibold flex items-center justify-center gap-2 transition"
           >
             {loading ? (
               <>
-                <Loader2 className="animate-spin mr-2 w-5 h-5" /> Uploading...
+                <Loader2 className="animate-spin w-5 h-5" /> Uploading...
               </>
             ) : (
               <>
-                <Upload className="mr-2 w-5 h-5" /> Upload Product
+                <Upload className="w-5 h-5" /> Upload Product
               </>
             )}
           </button>

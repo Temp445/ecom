@@ -83,7 +83,7 @@ export default function AddToCartButton({
     <button
       onClick={handleAddToCart}
       disabled={loading}
-      className="flex items-center justify-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-950 transition disabled:opacity-50"
+      className="flex items-center justify-center gap-2 bg-gray-900 text-white px-4 py-2 rounded w-full hover:bg-gray-950 transition disabled:opacity-50"
     >
       {loading ? (
         <Loader2 className="animate-spin w-4 h-4" />
