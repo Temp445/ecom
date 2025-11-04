@@ -123,7 +123,7 @@ export default function ProductDetailPage() {
                 )}
               </div>
 
-              <h1 className="text-4xl font-light text-neutral-900 mb-6 leading-tight tracking-tight">
+              <h1 className="text-2xl 2xl:text-4xl font-light text-neutral-900 mb-6 leading-tight tracking-tight">
                 {product.name}
               </h1>
 
@@ -135,7 +135,7 @@ export default function ProductDetailPage() {
 
               <div className="mb-8 pb-8 border-b border-neutral-200">
                 <div className="flex items-baseline gap-4 mb-2">
-                  <span className="text-3xl font-light text-neutral-900 font-sans">
+                  <span className="text-2xl 2xl:text-3xl font-light text-neutral-900 font-sans">
                     ₹
                     {(product.discountPrice || product.price)?.toLocaleString()}
                   </span>
@@ -146,7 +146,7 @@ export default function ProductDetailPage() {
                   )}
                 </div>
                 {product.discountPrice > 0 && (
-                  <p className="text-xs text-neutral-500 uppercase tracking-wide">
+                  <p className="text-xs text-neutral-800 uppercase tracking-wide">
                     You save ₹{" "}
                     <span> {product.price - product.discountPrice} </span>
                   </p>
@@ -191,7 +191,7 @@ export default function ProductDetailPage() {
               </div>
 
               {product.deliveryCharge !== undefined && (
-                <div className="mb-8 text-sm text-neutral-600 flex items-center gap-2">
+                <div className="mb-8 text-sm text-neutral-800 flex items-center gap-2">
                   <Truck size={16} />
                   <span>
                     {product.deliveryCharge === 0
@@ -202,7 +202,7 @@ export default function ProductDetailPage() {
               )}
 
               <div className="mb-8">
-                <label className="text-xs uppercase tracking-widest text-neutral-500 mb-3 block">
+                <label className="text-xs uppercase tracking-widest text-neutral-800 mb-3 block">
                   Quantity
                 </label>
                 <div className="flex items-center rounded border border-neutral-300 w-fit">
@@ -230,6 +230,7 @@ export default function ProductDetailPage() {
                 product={product}
                 userId={user?._id}
                 quantity={quantity}
+                className="text-white bg-gray-900 hover:bg-gray-950 transition disabled:opacity-50" 
               />
             </div>
           </div>
@@ -290,7 +291,7 @@ export default function ProductDetailPage() {
                       key={key}
                       className="flex justify-between py-3 border-b border-neutral-200"
                     >
-                      <span className="text-xs uppercase tracking-widest text-neutral-500">
+                      <span className="text-xs uppercase tracking-widest text-neutral-700">
                         {label}
                       </span>
                       <span className="text-sm font-medium text-neutral-900 text-right max-w-[200px]">

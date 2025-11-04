@@ -27,8 +27,9 @@ interface Product {
   discountPrice?: number;
   stock?: number;
   thumbnail?: string;
-  image?: string;
   images?: string[];
+  deliveryCharge?: number,
+
 }
 
 interface CartItemType {
@@ -129,6 +130,8 @@ const CartItem = () => {
     mergeLocalCart();
   }, [user?._id]);
 
+  
+
   const handleQuantityUpdate = async (itemId: string, newQty: number) => {
     if (newQty < 1) return;
 
@@ -215,7 +218,7 @@ const CartItem = () => {
   if (loading)
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+        <Loader2 className="w-8 h-8 text-gray-900 animate-spin" />
       </div>
     );
 
@@ -292,6 +295,13 @@ const CartItem = () => {
     return sum + (original - discounted) * item.quantity;
   }, 0);
 
+  const totalDeliveryCharge = cart.items.reduce((sum, item) => {
+  const product = item.productId || item.product;
+  if (!product) return sum;
+  return sum + (product.deliveryCharge || 0);
+}, 0);
+
+
   const itemCount = cart.items.filter((i) => i.productId || i.product).length;
 
   return (
@@ -363,7 +373,6 @@ const CartItem = () => {
                       <img
                         src={
                           product.thumbnail ||
-                          product.image ||
                           product.images?.[0] ||
                           "/placeholder.png"
                         }
@@ -409,7 +418,7 @@ const CartItem = () => {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div>
                         <div className="flex items-baseline gap-2 mb-2">
-                          <span className="text-2xl font-bold text-slate-800">
+                          <span className="text-2xl font-bold text-slate-800 font-sans">
                             ₹{price.toLocaleString()}
                           </span>
                           {hasDiscount && (
@@ -420,7 +429,7 @@ const CartItem = () => {
                         </div>
                         <p className="text-sm text-slate-600">
                           Subtotal:{" "}
-                          <span className="font-semibold text-slate-800">
+                          <span className="font-semibold text-slate-800 font-sans">
                             ₹{(price * item.quantity).toLocaleString()}
                           </span>
                         </p>
@@ -472,30 +481,38 @@ const CartItem = () => {
             <div className="space-y-3 mb-6 pb-6 border-b border-slate-200">
               <div className="flex justify-between text-slate-800">
                 <span>Price ({itemCount} items)</span>
-                <span className="font-semibold">
+                <span className="font-semibold font-sans">
                   ₹{(totalAmount + totalPriceSave).toLocaleString()}
                 </span>
               </div>
 
               {totalPriceSave > 0 && (
-                <div className="flex justify-between text-slate-800">
+                <div className="flex justify-between text-slate-800 font-sans">
                   <span>Discount</span>
-                  <span className="text-green-600">
+                  <span className="text-neutral-600">
                     -₹{totalPriceSave.toLocaleString()}
                   </span>
                 </div>
               )}
+   
+                <div className="flex justify-between text-slate-800">
+                  <span>Delivery</span>
+                  <span className="text-green-600">
+                    {totalDeliveryCharge > 0 ? (<span> ₹  { totalDeliveryCharge.toLocaleString()} </span> )   : "Free"}
+                  </span>
+                </div>
+              
             </div>
 
             <div className="flex justify-between items-center mb-6 pb-6 border-b border-slate-200">
               <span className="text-lg font-bold text-slate-800">Total</span>
-              <span className="text-xl font-semibold">
-                ₹{totalAmount.toLocaleString()}
+              <span className="text-xl font-semibold font-sans">
+                ₹{(totalAmount + totalDeliveryCharge || 0).toLocaleString() }
               </span>
             </div>
 
             {totalPriceSave > 0 && (
-              <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 text-center text-green-800 font-medium">
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 text-center text-green-800 font-medium font-sans">
                 You're saving ₹{totalPriceSave.toLocaleString()} on this order!
               </div>
             )}

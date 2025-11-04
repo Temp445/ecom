@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 const Offer = () => {
   return (
     <div className="bg-white">
-        <section className="relative bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20 text-center px-6 rounded-3xl mx-4 overflow-hidden">
+        <section className="relative bg-gray-950 text-white py-20 text-center px-6 rounded-3xl mx-4 overflow-hidden">
       <motion.div
         className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_#fff_1px,_transparent_1px)] bg-[size:20px_20px]"
         animate={{ backgroundPosition: ["0px 0px", "20px 20px"] }}
@@ -23,7 +23,7 @@ const Offer = () => {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="px-8 py-3 bg-white text-blue-700 font-semibold rounded-full shadow-md hover:bg-yellow-300 hover:text-black transition-colors duration-300"
+          className="px-8 py-3 bg-white text-black font-semibold rounded-full shadow-md hover:bg-yellow-300 hover:text-black transition-colors duration-300"
           onClick={() => alert("Offer claimed! Our team will contact you soon.")}
         >
           Contact Us

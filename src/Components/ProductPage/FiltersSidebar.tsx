@@ -73,12 +73,12 @@ export default function FiltersSidebar({
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-              <Filter size={20} className="text-emerald-600" /> Filters
+              <Filter size={20} /> Filters
             </h2>
             <div className="flex items-center gap-2">
               <button
                 onClick={clearFilters}
-                className="text-sm font-medium text-emerald-700 hover:text-emerald-800"
+                className="text-sm font-medium text-gray-800"
               >
                 Clear All
               </button>
@@ -109,7 +109,7 @@ export default function FiltersSidebar({
                         category._id ? selectedCategories.includes(category._id) : false
                       }
                       onChange={() => toggleCategory(category._id)}
-                      className="w-4 h-4 accent-emerald-600 rounded border-slate-300"
+                      className="w-4 h-4 accent-gray-900 rounded border-slate-300"
                     />
                     <span className="text-sm text-slate-700 group-hover:text-slate-900 transition-colors">
                       {category.Name || "Unnamed"}
@@ -120,7 +120,6 @@ export default function FiltersSidebar({
             </div>
           )}
 
-          {/* Price Range Section */}
           <div className="mb-8">
             <h3 className="font-semibold text-slate-800 mb-3 text-sm uppercase tracking-wide">
               Price Range
@@ -144,7 +143,6 @@ export default function FiltersSidebar({
             </div>
           </div>
 
-          {/* Sort By Section */}
           <div>
             <h3 className="font-semibold text-slate-800 mb-3 text-sm uppercase tracking-wide">
               Sort By
@@ -153,7 +151,7 @@ export default function FiltersSidebar({
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm
-              focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition"
+                transition"
             >
               <option value="featured">Featured</option>
               <option value="price-low">Price: Low to High</option>

@@ -32,8 +32,8 @@ const UserMenu = () => {
       >
         {isLoggedIn ? (
           <div className="flex gap-2 items-center">
-            <CircleUserRound className="w-6 h-6" />
-            <span>{user?.firstName || "User"}</span>
+            <CircleUserRound className=" w-5 h-5 2xl:w-6 2xl:h-6" />
+            <span className="text-sm 2xl:text-base">{user?.firstName || "User"}</span>
             <ChevronUp
               className={`w-4 h-5 transition-transform duration-300 ${
                 isOpen ? "rotate-180" : "group-hover:rotate-180"
@@ -42,7 +42,7 @@ const UserMenu = () => {
           </div>
         ) : (
           <Link href="/login" className="flex gap-2 items-center">
-            <CircleUserRound className="w-6 h-6" /> Login
+            <CircleUserRound className="w-5 h-5 2xl:w-6 2xl:h-6" /> <span className="text-sm 2xl:text-base">Login</span>
             <ChevronUp className="w-4 h-5 group-hover:rotate-180 transition-transform duration-300" />
           </Link>
         )}

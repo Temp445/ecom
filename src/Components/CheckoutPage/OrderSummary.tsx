@@ -25,9 +25,7 @@ export default function OrderSummary({
             <ShoppingCart className="text-white w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-lg sm:text-xl text-slate-900">
-              Order Summary
-            </h2>
+            <h2 className="text-lg sm:text-xl text-slate-900">Order Summary</h2>
             <p className="text-xs text-slate-500">
               {cartItems.length} {cartItems.length === 1 ? "item" : "items"}
             </p>
@@ -64,8 +62,11 @@ export default function OrderSummary({
                 typeof it.price === "number"
                   ? it.price
                   : typeof it.productId === "object"
-                  ? it.productId.price ?? 0
+                  ? it.productId.discountPrice && it.productId.discountPrice > 0
+                    ? it.productId.discountPrice
+                    : it.productId.price ?? 0
                   : 0;
+
               const stock =
                 typeof it.productId === "object"
                   ? it.productId.stock ?? Infinity
@@ -90,7 +91,7 @@ export default function OrderSummary({
                       <img
                         src={img}
                         alt={name}
-                        className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg object-cover flex-shrink-0 shadow-sm"
+                        className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg object-contain flex-shrink-0 shadow-sm"
                       />
                     ) : (
                       <div className="w-20 h-20 sm:w-24 sm:h-24 bg-slate-200 rounded-lg flex-shrink-0 flex items-center justify-center">
@@ -105,9 +106,8 @@ export default function OrderSummary({
 
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-emerald-600 font-sans font-medium text-base sm:text-lg">
-                          ₹{price.toFixed(2)}
+                          ₹{price.toLocaleString()}
                         </span>
-                        
                       </div>
 
                       <div className="flex items-center justify-between mt-3">
@@ -142,7 +142,7 @@ export default function OrderSummary({
                             Subtotal
                           </p>
                           <p className="font-medium text-slate-900 text-sm font-sans sm:text-base">
-                            ₹{(price * it.quantity).toFixed(2)}
+                            ₹{(price * it.quantity).toLocaleString()}
                           </p>
                         </div>
                       </div>
@@ -152,8 +152,6 @@ export default function OrderSummary({
               );
             })}
           </div>
-
-     
         </div>
       )}
     </section>

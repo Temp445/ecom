@@ -11,13 +11,13 @@ export default function Navbar() {
     <div className="flex items-center justify-center gap-2 py-4">
 
       <Link href="/cart" className="relative flex items-center gap-1">
-        <ShoppingCart className="w-6 h-6 text-gray-700" />
+        <ShoppingCart className="w-5 2xl:w-6 2xl:h-6 text-gray-700" />
         {cartCount > 0 && (
-          <span className=" absolute  -top-2 left-3 text-xs text-gray-700 font-semibold">
+          <span className=" absolute  -top-2 left-3 text-xs text-gray-800 font-medium 2xl:font-semibold">
             ({cartCount})
           </span>
         )}
-      <div>Cart</div>
+      <div className="text-sm 2xl:text-base">Cart</div>
       </Link>
 
     </div>

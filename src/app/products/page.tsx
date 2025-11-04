@@ -97,7 +97,7 @@ export default function ProductsPage() {
   if (loading) {
     return (
       <div className="flex flex-col justify-center items-center min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-        <Loader2 className="animate-spin text-blue-600 mb-4" size={48} />
+        <Loader2 className="animate-spin text-gray-600 mb-4" size={48} />
       </div>
     );
   }
@@ -140,7 +140,7 @@ export default function ProductsPage() {
                   onClick={() => setViewMode("list")}
                   className={`p-2 rounded-lg border ${
                     viewMode === "list"
-                      ? "bg-blue-600 text-white border-blue-600"
+                      ? "bg-gray-900 text-white border-gray-900"
                       : "bg-white text-slate-600 border-slate-300 hover:bg-slate-100"
                   }`}
                   title="List View"

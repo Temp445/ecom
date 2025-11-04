@@ -56,32 +56,32 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white sticky top-0 z-50 border-b border-gray-100 shadow-sm">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 2xl:px-6">
+      <div className="container mx-auto px-4 sm:px-4 ">
         <div className="flex justify-between items-center h-16 ">
           <Link href="/" className="flex flex-col items-start sm:items-center flex-shrink-0 min-w-0">
-            <div className="flex items-end gap-1 sm:gap-2">
+            <div className="flex items-end">
               <Image 
                 src={Logo} 
                 alt="ACE Hydraulic logo" 
                 width={32} 
                 height={32} 
-                className="sm:w-10 sm:h-10 flex-shrink-0"
+                className="2xl:w-8 2xl:h-9 flex-shrink-0"
               />
-              <span className="font-medium text-xl sm:text-2xl font-sans text-gray-900">
+              <span className="font-medium text-xl 2xl:text-2xl font-sans text-gray-900">
                 ACE
               </span>
             </div>
-            <div className="ml-0 sm:ml-4 -mt-1 sm:-mt-1.5 font-medium uppercase text-xs sm:text-sm text-gray-600 whitespace-nowrap">
+            <div className=" -mt-1 sm:-mt-1.5 font-medium uppercase text-xs 2xl:text-sm text-gray-600 whitespace-nowrap">
               Hydraulic
             </div>
           </Link>
 
-          <div className="hidden lg:flex items-center space-x-6 xl:space-x-10">
+          <div className="hidden lg:flex items-center space-x-4 xl:space-x-10">
             {allLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-gray-900  font-medium text-sm  relative group"
+                className="text-gray-900  font-medium text-xs 2xl:text-sm  relative group"
               >
                 {link.label}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gray-900 rounded-full group-hover:w-full transition-all duration-300"></span>
@@ -91,8 +91,6 @@ export default function Navbar() {
 
           <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
                <SearchBar/>
-
-
             <div>
               <UserMenu />
             </div>
@@ -100,10 +98,7 @@ export default function Navbar() {
             <div className="hidden sm:block">
             <CartBadge />
             </div>
-
-         
-
-            <button
+             <button
               onClick={() => setIsOpen(!isOpen)}
               className="lg:hidden p-2 text-gray-700 hover:bg-blue-50 hover:text-blue-500 rounded-full transition-colors flex-shrink-0"
               aria-label="Toggle menu"
@@ -150,13 +145,7 @@ export default function Navbar() {
               >
                 My Account
               </Link>
-              <Link
-                href="/notifications"
-                className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors font-medium text-sm"
-                onClick={() => setIsOpen(false)}
-              >
-                Notifications
-              </Link>
+              
             </div>
           </div>
         )}

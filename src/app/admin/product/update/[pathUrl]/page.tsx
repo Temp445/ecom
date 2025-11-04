@@ -8,7 +8,6 @@ import {
   X,
   Plus,
   Package,
-  DollarSign,
   Truck,
   FileImage,
 } from "lucide-react";
@@ -368,7 +367,6 @@ const ProductEditPage: React.FC = () => {
                         onChange={handleChange}
                         placeholder="0.00"
                         min="0"
-                        step="0.01"
                         className="w-full px-4 py-2.5 border  rounded-lg no-spinner"
                       />
                     </div>
@@ -383,7 +381,6 @@ const ProductEditPage: React.FC = () => {
                         onChange={handleChange}
                         placeholder="0.00"
                         min="0"
-                        step="0.01"
                         className="w-full px-4 py-2.5 border rounded-lg no-spinner"
                       />
                     </div>
@@ -425,9 +422,8 @@ const ProductEditPage: React.FC = () => {
                         name="deliveryCharge"
                         value={formData.deliveryCharge}
                         onChange={handleChange}
-                        placeholder="0.00"
+                        placeholder="50"
                         min="0"
-                        step="0.01"
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg no-spinner transition"
                       />
                     </div>
@@ -455,25 +451,27 @@ const ProductEditPage: React.FC = () => {
                     </h2>
                   </div>
 
-                  {(
-                    Object.keys(
-                      technicalDetails
-                    ) as (keyof typeof technicalDetails)[]
-                  ).map((key) => (
-                    <div key={key as string}>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5 gap-5 capitalize">
-                        {key.replace(/([A-Z])/g, " $1")}
-                      </label>
-                      <input
-                        type="text"
-                        name={key as string}
-                        value={technicalDetails[key] ?? ""}
-                        onChange={handleTechChange}
-                        placeholder={`Enter ${key.toLowerCase()}`}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg  transition"
-                      />
-                    </div>
-                  ))}
+                  <div className="grid grid-cols-2 gap-4">
+                    {Object.entries(technicalDetails)
+                      .filter(([key]) => key !== "_id" && key !== "id")
+                      .map(([key, value]) => (
+                        <div key={key} className="space-y-2">
+                          <label className="font-medium text-gray-700 capitalize">
+                            {key.replace(/([A-Z])/g, " $1")}
+                          </label>
+                          <input
+                            name={key}
+                            value={value}
+                            onChange={handleTechChange}
+                            className="w-full border border-gray-300 rounded-lg p-3"
+                            placeholder={`Enter ${key.replace(
+                              /([A-Z])/g,
+                              " $1"
+                            )}`}
+                          />
+                        </div>
+                      ))}
+                  </div>
                 </div>
 
                 <div className="bg-white border border-gray-200 rounded-xl p-6">
@@ -537,128 +535,128 @@ const ProductEditPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-                  <div className="grid grid-cols-2 gap-6 mb-8">
-                  <div className="bg-white border border-gray-200 rounded-xl p-6">
-                    <h2 className="text-lg font-bold text-gray-800 mb-4">
-                      Thumbnail
-                    </h2>
+              <div className="grid grid-cols-2 gap-6 mb-8">
+                <div className="bg-white border border-gray-200 rounded-xl p-6">
+                  <h2 className="text-lg font-bold text-gray-800 mb-4">
+                    Thumbnail
+                  </h2>
 
-                    {existingThumbnail && !thumbnailPreview && (
-                      <div className="relative rounded-lg overflow-hidden border border-gray-200">
-                        <img
-                          src={existingThumbnail}
-                          alt="Existing Thumbnail"
-                          className="w-full h-48 object-contain"
-                        />
-                        <button
-                          type="button"
-                          onClick={removeThumbnail}
-                          className="absolute top-2 right-2 bg-white text-red-600 rounded-full p-1.5 hover:bg-red-50 shadow-lg transition-colors"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    )}
+                  {existingThumbnail && !thumbnailPreview && (
+                    <div className="relative rounded-lg overflow-hidden border border-gray-200">
+                      <img
+                        src={existingThumbnail}
+                        alt="Existing Thumbnail"
+                        className="w-full h-48 object-contain"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeThumbnail}
+                        className="absolute top-2 right-2 bg-white text-red-600 rounded-full p-1.5 hover:bg-red-50 shadow-lg transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
 
-                    {thumbnailPreview && (
-                      <div className="relative rounded-lg overflow-hidden border border-gray-200">
-                        <img
-                          src={thumbnailPreview}
-                          alt="Thumbnail"
-                          className="w-full h-48 object-contain"
-                        />
-                        <button
-                          type="button"
-                          onClick={removeThumbnail}
-                          className="absolute top-2 right-2 bg-white text-red-600 rounded-full p-1.5 hover:bg-red-50 shadow-lg transition-colors"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    )}
+                  {thumbnailPreview && (
+                    <div className="relative rounded-lg overflow-hidden border border-gray-200">
+                      <img
+                        src={thumbnailPreview}
+                        alt="Thumbnail"
+                        className="w-full h-48 object-contain"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeThumbnail}
+                        className="absolute top-2 right-2 bg-white text-red-600 rounded-full p-1.5 hover:bg-red-50 shadow-lg transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
 
-                    {!existingThumbnail && !thumbnailPreview && (
-                      <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-8 cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={handleThumbnailChange}
-                        />
-                        <FileImage className="w-12 h-12 text-gray-400 mb-2" />
-                        <span className="text-sm font-medium text-gray-600">
-                          Upload Thumbnail
-                        </span>
-                      </label>
-                    )}
-                  </div>
-
-                  <div className="bg-white border border-gray-200 rounded-xl p-6">
-                    <h2 className="text-lg font-bold text-gray-800 mb-4">
-                      Gallery Images
-                    </h2>
-
-                    <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-10 cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all">
+                  {!existingThumbnail && !thumbnailPreview && (
+                    <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-8 cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all">
                       <input
                         type="file"
-                        multiple
                         accept="image/*"
-                        onChange={handleImagesChange}
                         className="hidden"
+                        onChange={handleThumbnailChange}
                       />
-                      <Plus className="w-8 h-8 text-gray-400 mb-2" />
-                      <span className="text-sm text-gray-600">Add Images</span>
+                      <FileImage className="w-12 h-12 text-gray-400 mb-2" />
+                      <span className="text-sm font-medium text-gray-600">
+                        Upload Thumbnail
+                      </span>
                     </label>
-
-                    {existingImages.length > 0 && (
-                      <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        {existingImages.map((src, index) => (
-                          <div
-                            key={`existing-${index}`}
-                            className="relative group border border-gray-200 rounded-lg overflow-hidden shadow-sm"
-                          >
-                            <img
-                              src={src}
-                              alt={`Existing ${index + 1}`}
-                              className="w-full h-28 object-contain"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => removeImage(index, true)}
-                              className="absolute top-1 right-1 bg-white/90 text-red-600 rounded-full p-1.5 shadow hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {imagePreviews.length > 0 && (
-                      <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        {imagePreviews.map((src, index) => (
-                          <div
-                            key={`new-${index}`}
-                            className="relative group border border-gray-200 rounded-lg overflow-hidden shadow-sm"
-                          >
-                            <img
-                              src={src}
-                              alt={`Preview ${index + 1}`}
-                              className="w-full h-28 object-contain"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => removeImage(index)}
-                              className="absolute top-1 right-1 bg-white/90 text-red-600 rounded-full p-1.5 shadow hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </div>
+
+                <div className="bg-white border border-gray-200 rounded-xl p-6">
+                  <h2 className="text-lg font-bold text-gray-800 mb-4">
+                    Gallery Images
+                  </h2>
+
+                  <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-10 cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all">
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={handleImagesChange}
+                      className="hidden"
+                    />
+                    <Plus className="w-8 h-8 text-gray-400 mb-2" />
+                    <span className="text-sm text-gray-600">Add Images</span>
+                  </label>
+
+                  {existingImages.length > 0 && (
+                    <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                      {existingImages.map((src, index) => (
+                        <div
+                          key={`existing-${index}`}
+                          className="relative group border border-gray-200 rounded-lg overflow-hidden shadow-sm"
+                        >
+                          <img
+                            src={src}
+                            alt={`Existing ${index + 1}`}
+                            className="w-full h-28 object-contain"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index, true)}
+                            className="absolute top-1 right-1 bg-white/90 text-red-600 rounded-full p-1.5 shadow hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {imagePreviews.length > 0 && (
+                    <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                      {imagePreviews.map((src, index) => (
+                        <div
+                          key={`new-${index}`}
+                          className="relative group border border-gray-200 rounded-lg overflow-hidden shadow-sm"
+                        >
+                          <img
+                            src={src}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-28 object-contain"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute top-1 right-1 bg-white/90 text-red-600 rounded-full p-1.5 shadow hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
             <div className=" p-6">
               <div className="space-x-3 flex">

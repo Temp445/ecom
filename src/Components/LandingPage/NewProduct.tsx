@@ -2,14 +2,17 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCart, CircleChevronRight } from "lucide-react";
-import { Loader2 } from "lucide-react";
+
+import { useAuth } from "@/context/AuthProvider";
+import AddToCartButton from "../Button/AddToCartButton";
 
 export default function NewProduct() {
   const [newArrivals, setNewArrivals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+    const { user } = useAuth();
+
 
   useEffect(() => {
     fetchNewArrivals();
@@ -31,7 +34,6 @@ export default function NewProduct() {
   if (loading)
     return (
       <div className="flex justify-center py-16">
-        <Loader2 className="animate-spin text-gray-400" size={32} />
       </div>
     );
 
@@ -47,13 +49,11 @@ export default function NewProduct() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
-          {newArrivals.map((product, idx) => (
-            <Link
-              href={`/products/${product.pathUrl}`}
+          {newArrivals.slice(0, 8).map((product, idx) => (
+            <div
               key={product._id}
-              className="group relative bg-white rounded-sm border-2 border-gray-200 hover:border-slate-700 transition-all duration-300 overflow-hidden"
+              className="group relative bg-white rounded-sm border border-gray-200 hover:border-slate-700 transition-all duration-300 overflow-hidden"
             >
-              {/* Badge */}
               <div className="absolute top-0 right-0 w-full h-16">
                 <div className="absolute top-0 right-0 w-fit px-4 rounded-bl bg-slate-900 text-white text-center text-[10px] font-bold uppercase tracking-wider py-1 shadow-md">
                   NEW
@@ -62,14 +62,15 @@ export default function NewProduct() {
 
               <div className="grid grid-cols-5">
                 <div className="col-span-2 p-2 flex items-center justify-center">
-                  <div className="relative w-52 h-52 transform group-hover:scale-110 transition-all duration-500">
+                  <Link href={`/products/${product.pathUrl}`}
+                   className="relative w-52 h-52 transform group-hover:scale-110 transition-all duration-500">
                     <img
                       src={product.thumbnail || product.images?.[0] || "/placeholder.jpg"}
                       alt={product.name}
                       className="object-contain w-full h-full"
                       
                     />
-                  </div>
+                  </Link>
                 </div>
 
                 <div className="col-span-3 p-6 flex flex-col justify-between">
@@ -92,7 +93,7 @@ export default function NewProduct() {
                             Max Capacity:
                           </span>
                           <span className="font-mono font-bold text-gray-900">
-                            {product.technicalDetails.boreDiameter}
+                            {product.technicalDetails.workingPressure}
                           </span>
                         </div>
                      
@@ -112,11 +113,9 @@ export default function NewProduct() {
 
                   <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                     <div className="flex items-center gap-3">
-                      <button className="w-8 h-8 border border-gray-400 rounded hover:border-slate-700 hover:bg-slate-50 flex items-center justify-center transition">
-                        <ShoppingCart size={16} />
-                      </button>
+                     
                       <div className="font-sans text-base font-semibold">
-                        ₹{product.discountPrice?.toLocaleString() || product.price?.toLocaleString()}
+                        ₹{product.discountPrice > 0 ?product.discountPrice?.toLocaleString() : product.price.toLocaleString()}
                       </div>
                       {product.discountPrice > 0 && (
                         <div className="text-xs line-through font-sans text-gray-500">
@@ -125,13 +124,17 @@ export default function NewProduct() {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2 text-sm font-bold text-slate-700 group-hover:gap-3 transition-all duration-300">
+                    <Link href={`/products/${product.pathUrl}`}             
+                    className="flex items-center gap-2 text-sm font-bold text-slate-700 group-hover:gap-3 transition-all duration-300">
                       <CircleChevronRight />
-                    </div>
+                    </Link>
                   </div>
+                         <div className="bg-white text-red-500 text-xs mt-5">
+                <AddToCartButton product={product} userId={user?._id} className=" bg-white border borde-gray-800 text-gray-900"/>
+                </div>
                 </div>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       </div>

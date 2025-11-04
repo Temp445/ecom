@@ -32,6 +32,8 @@ export type CartItem = {
         price?: number;
         thumbnail?: string;
         stock?: number;
+        discountPrice?: number;
+        deliveryCharge?: number;
       }
     | string;
   name?: string;
@@ -81,19 +83,22 @@ export default function Checkout() {
     })();
   }, [user]);
 
-  const totalAmount = useMemo(
-    () =>
-      cartItems.reduce((sum, it) => {
-        const price =
-          typeof it.price === "number"
-            ? it.price
-            : typeof it.productId === "object"
-            ? it.productId.price ?? 0
-            : 0;
-        return sum + price * (it.quantity || 1);
-      }, 0),
-    [cartItems]
-  );
+const totalProductAmount = cartItems.reduce((sum, it) => {
+  const product = it.productId;
+  if (!product) return sum;
+  const price =
+    typeof product === "object" ? product.discountPrice || product.price || 0 : 0;
+  return sum + price * it.quantity;
+}, 0);
+
+const totalDeliveryCharge = cartItems.reduce((sum, item) => {
+  const product = item.productId;
+  if (!product) return sum;
+  return sum + (typeof product === "object" ? product.deliveryCharge || 0 : 0);
+}, 0);
+
+const totalAmount = totalProductAmount + totalDeliveryCharge;
+
 
   const goNext = () => {
     if (step === 1 && !user?._id)
@@ -159,7 +164,6 @@ export default function Checkout() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-12">
           <div className="flex items-center justify-between relative">
-            {/* Progress Line */}
             <div className="absolute top-4 left-0 right-0 h-px bg-slate-200" />
             <div
               className="absolute top-4 left-0 h-px bg-slate-900 transition-all duration-500"
@@ -270,14 +274,13 @@ export default function Checkout() {
                     {cartItems.length === 1 ? "item" : "items"})
                   </span>
                   <span className="font-semibold font-sans text-gray-900">
-                    ₹{totalAmount.toFixed(2)}
+                    ₹{totalProductAmount.toLocaleString()}
                   </span>
                 </div>
 
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600 text-sm">Items</span>(
-                  {cartItems.length} {cartItems.length === 1 ? "item" : "items"}
-                  )
+                <div className="flex justify-between items-center font-sans">
+                  <span className="text-gray-600 text-sm">Delivery fee</span>
+                   {totalDeliveryCharge > 0 ? (<span> ₹  { totalDeliveryCharge.toLocaleString()} </span> )   : "Free"}
                 </div>
               </div>
 
@@ -287,7 +290,7 @@ export default function Checkout() {
                     Total Amount
                   </span>
                   <span className="text-2xl font-bold font-sans text-gray-900">
-                    ₹{totalAmount.toFixed(2)}
+                    ₹{totalAmount.toLocaleString()}
                   </span>
                 </div>
               </div>

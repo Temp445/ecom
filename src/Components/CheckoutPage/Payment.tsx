@@ -35,7 +35,6 @@ export default function Payment({
 }: PaymentProps) {
   const [placingOrder, setPlacingOrder] = useState(false);
 
-  /** 🧾 Handle Place Order */
   const handlePlaceOrder = async () => {
     if (!user?._id) return toast.error("Please login to continue");
     if (!selectedAddressId) return toast.error("Please select a delivery address");
@@ -44,10 +43,6 @@ export default function Payment({
     setPlacingOrder(true);
     try {
       const orderDate = new Date();
-      const deliveryDate = new Date();
-      deliveryDate.setDate(orderDate.getDate() + 5); // Expected delivery in 5 days
-
-      // ✅ Build order payload matching Order model
       const payload = {
         userId: user._id,
         items: cartItems.map((it) => ({
@@ -79,26 +74,23 @@ export default function Payment({
             : undefined,
         orderStatus: "Processing",
         orderDate,
-        deliveryDate,
       };
 
       const res = await axios.post("/api/orders", payload);
 
       if (res.status === 201 || res.data?.success) {
-        toast.success("Order placed successfully 🎉");
+        toast.success("Order placed successfully");
         router.push("/orders/success");
       } else {
         toast.error(res.data?.error || "Failed to place order");
       }
     } catch (err: any) {
-      console.error("Order placement error:", err);
       toast.error(err?.response?.data?.error || "Order creation failed");
     } finally {
       setPlacingOrder(false);
     }
   };
 
-  /** 💳 Payment options */
   const paymentOptions = [
     {
       id: "Online",
@@ -120,7 +112,6 @@ export default function Payment({
 
   return (
     <section className="space-y-6 p-4 bg-white rounded-2xl shadow-sm">
-      {/* Header */}
       <div className="flex items-center gap-3 pb-4 border-b border-gray-200">
         <div className="bg-emerald-500 p-2.5 rounded-lg">
           <CreditCard className="text-white w-5 h-5" />
@@ -131,7 +122,6 @@ export default function Payment({
         </div>
       </div>
 
-      {/* Payment options */}
       <div className="grid sm:grid-cols-2 gap-4">
         {paymentOptions.map((option) => {
           const Icon = option.icon;

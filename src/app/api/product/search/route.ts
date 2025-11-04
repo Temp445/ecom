@@ -16,8 +16,6 @@ export async function GET(req: Request) {
     const products = await Product.find({
       $or: [
         { name: { $regex: query, $options: "i" } },
-        // { description: { $regex: query, $options: "i" } },
-        // { model: { $regex: query, $options: "i" } },
       ],
     })
       .populate("category", "name pathUrl")

@@ -37,7 +37,6 @@ export async function POST(req: Request) {
   try {
     await dbConnect();
     const body = await req.json();
-    console.log("Incoming Order Body:", body);
 
     const { userId, items, shippingAddress, totalAmount, paymentMethod, paymentStatus, orderStatus } = body;
 

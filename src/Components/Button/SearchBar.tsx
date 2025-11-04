@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import axios from "axios";
-import { Search, X } from "lucide-react";
+import { Search, X , ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function SearchBar() {
@@ -44,13 +44,13 @@ export default function SearchBar() {
     <div className="w-full max-w-2xl mx-auto relative">
       <form onSubmit={handleSearch} className="relative">
         <div className="relative flex items-center bg-white border border-gray-200 rounded-full  hover:shadow-md focus-within:border-gray-400 focus-within:shadow-lg transition-all duration-200">
-          <div className="pl-3 text-gray-400">
-            <Search size={18} />
+          <div className="pl-2 2xl:pl-3 text-gray-400">
+            <Search className=" w-4 2xl:w-5" />
           </div>
           <input
             type="text"
             placeholder="Search for products..."
-            className="flex-1 px-3 py-2 text-sm outline-none bg-transparent text-gray-800 placeholder-gray-400"
+            className="flex-1 px-3 py-2 text-xs 2xl:text-sm outline-none bg-transparent text-gray-800 placeholder-gray-400"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -63,17 +63,17 @@ export default function SearchBar() {
             <button
               type="button"
               onClick={clearSearch}
-              className="mr-3 absolute right-0 p-1 hover:bg-gray-100 rounded-full transition-colors"
+              className=" mr-1 2xl:mr-3 absolute right-0 p-1 hover:bg-gray-100 rounded-full transition-colors"
               aria-label="Clear search"
             >
-              <X size={18} className="text-gray-500" />
+              <X className="text-gray-500 w-4 2xl:w-5 2xl:h-5" />
             </button>
           )}
         </div>
       </form>
 
       {showResults && (
-        <div className="absolute w-md mt-2 bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden z-50 max-h-[28rem] overflow-y-auto">
+        <div className="absolute w-sm 2xl:w-md mt-2 bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden z-50 max-h-[28rem] overflow-y-auto">
           {loading ? (
             <div className="p-8 text-center">
               <div className="inline-block w-8 h-8 border-3 border-gray-300 border-t-gray-600 rounded-full animate-spin mb-3"></div>
@@ -98,20 +98,18 @@ export default function SearchBar() {
                     </div>
                     
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 group-hover:text-gray-700 transition-colors truncate">
+                      <p className="font-medium text-sm 2xl:text-base text-gray-900 group-hover:text-gray-700 transition-colors truncate">
                         {item.name}
                       </p>
                       {item.price && (
-                        <p className="text-sm text-gray-500 mt-0.5">
+                        <p className="text-xs 2xl:text-sm font-sans text-gray-500 mt-0.5">
                           ₹{item.price.toLocaleString()}
                         </p>
                       )}
                     </div>
                     
                     <div className="flex-shrink-0 text-gray-300 group-hover:text-gray-600 transition-colors">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
+                      <ChevronRight />
                     </div>
                   </div>
                 </div>

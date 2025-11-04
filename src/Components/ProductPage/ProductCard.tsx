@@ -67,7 +67,7 @@ export default function ProductCard({
       <div className={`p-6 flex flex-col ${viewMode === "list" ? "flex-1" : ""}`}>
         <h2
           onClick={() => router.push(`/products/${product.pathUrl}`)}
-          className="text-lg font-medium text-slate-800 mb-2 cursor-pointer hover:text-blue-600 transition line-clamp-2 leading-snug"
+          className="text-lg font-medium text-slate-800 mb-2 cursor-pointer hover:text-gray-900 transition line-clamp-2 leading-snug"
         >
           {product.name}
         </h2>
@@ -86,15 +86,16 @@ export default function ProductCard({
                 ₹{product.price?.toLocaleString()}
               </p>
             )}
-          </div>
-          {product.discountPrice > 0 && (
+                {product.discountPrice > 0 && (
             <p className="text-xs text-emerald-600 font-medium">
               You save ₹{(product.price - product.discountPrice)?.toLocaleString()}
             </p>
           )}
+          </div>
+      
         </div>
 
-        <AddToCartButton product={product} userId={userId} />
+        <AddToCartButton product={product} userId={userId} className="text-white bg-gray-900 hover:bg-gray-950 transition disabled:opacity-50"  />
       </div>
     </div>
   );

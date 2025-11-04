@@ -50,6 +50,8 @@ const AddressForm: React.FC<AddressFormProps> = ({
   const [loading, setLoading] = useState(false);
   const [country, setCountry] = useState("IN");
   const [states, setStates] = useState<any[]>([]);
+  const [city, setCity]= useState<any[]>([]);
+  const [postal, setPostal]= useState<any[]>([]);
 
   const countries = Country.getAllCountries();
   const countryCode: CountryCode = (country as CountryCode) || "IN";
@@ -60,6 +62,8 @@ const AddressForm: React.FC<AddressFormProps> = ({
         const { data } = await axios.get("https://ipapi.co/json/");
         if (data?.country_code) {
           setCountry(data.country_code);
+          setCity(data.city)
+          setPostal(data.postal)
           setFormData((prev) => ({ ...prev, Country: data.country_name }));
           setStates(State.getStatesOfCountry(data.country_code));
         }
@@ -228,7 +232,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
             <label className="block text-sm font-medium text-slate-700 mb-1"> City <span className="text-red-500">*</span> </label>
           <input
             name="City"
-            placeholder="City"
+            placeholder={`${city}`}
             value={formData.City}
             onChange={handleChange}
             className="w-full border border-slate-300 p-3 rounded-lg"
@@ -239,7 +243,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
           <label className="block text-sm font-medium text-slate-700 mb-1"> Pin Code <span className="text-red-500">*</span> </label>
             <input
             name="PinCode"
-            placeholder="600001"
+            placeholder={`${postal}`}
             value={formData.PinCode}
             onChange={handleChange}
             className="w-full border border-slate-300 p-3 rounded-lg"
