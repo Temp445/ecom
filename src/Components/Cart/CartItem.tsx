@@ -214,7 +214,7 @@ const CartItem = () => {
       setUpdatingId(null);
     }
   };
-  
+
 const inStockItems = cart?.items.filter((item) => {
   const product = item.productId || item.product;
   return product && item.quantity <= (product.stock ?? 0);
@@ -226,7 +226,7 @@ const inStockItems = cart?.items.filter((item) => {
   if (loading)
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="w-8 h-8 text-gray-900 animate-spin" />
+        <Loader2 className="w-10 h-10 text-gray-900 animate-spin" />
       </div>
     );
 

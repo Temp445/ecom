@@ -88,8 +88,8 @@ export default function OrdersPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-gray-100">
-        <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
+      <div className="min-h-screen flex justify-center items-center">
+               <Loader2 className="w-10 h-10 text-gray-900 animate-spin" />
       </div>
     );
   }
