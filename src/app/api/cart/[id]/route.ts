@@ -35,7 +35,6 @@ export async function PUT(req: Request, { params }: { params: Promise <{ id: str
 
     return NextResponse.json({ success: true, cart });
   } catch (error: any) {
-    console.error("Error updating cart:", error);
     return NextResponse.json(
       { success: false, message: "Failed to update cart", error: error.message },
       { status: 500 }
@@ -62,7 +61,6 @@ export async function DELETE(req: Request, { params }: { params: Promise <{ id: 
 
     return NextResponse.json({ success: true, message: "Item removed" });
   } catch (error: any) {
-    console.error("Error removing item:", error);
     return NextResponse.json(
       { success: false, message: "Failed to remove item", error: error.message },
       { status: 500 }

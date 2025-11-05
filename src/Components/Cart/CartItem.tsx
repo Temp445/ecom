@@ -214,6 +214,14 @@ const CartItem = () => {
       setUpdatingId(null);
     }
   };
+  
+const inStockItems = cart?.items.filter((item) => {
+  const product = item.productId || item.product;
+  return product && item.quantity <= (product.stock ?? 0);
+}) || [];
+
+
+
 
   if (loading)
     return (
@@ -435,7 +443,7 @@ const CartItem = () => {
                         </p>
                       </div>
 
-                      <div className="flex items-center border border-slate-300 rounded-lg overflow-hidden w-fit">
+                      <div className="flex items-center border border-gray-400 rounded-lg overflow-hidden w-fit">
                         <button
                           onClick={() =>
                             handleQuantityUpdate(
@@ -443,8 +451,8 @@ const CartItem = () => {
                               item.quantity - 1
                             )
                           }
-                          disabled={item.quantity <= 1 || isUpdating}
-                          className="px-4 py-4 hover:bg-gray-800 hover:text-white disabled:cursor-not-allowed transition-colors"
+                          disabled={item.quantity <= 1}
+                          className="px-4 py-4 disabled:opacity-30 cursor-pointer  transition-colors"
                         >
                           <Minus size={16} />
                         </button>
@@ -458,8 +466,8 @@ const CartItem = () => {
                               item.quantity + 1
                             )
                           }
-                          disabled={isUpdating || item.quantity >= stock}
-                          className="px-4 py-4 hover:bg-emerald-600 hover:text-white disabled:cursor-not-allowed transition-colors"
+                          disabled={item.quantity >= stock}
+                          className="px-4 py-4  disabled:opacity-30  cursor-pointer transition-colors"
                         >
                           <Plus size={16} />
                         </button>
@@ -497,7 +505,7 @@ const CartItem = () => {
    
                 <div className="flex justify-between text-slate-800">
                   <span>Delivery</span>
-                  <span className="text-green-600">
+                  <span className="text-emerald-600 font-sans">
                     {totalDeliveryCharge > 0 ? (<span> ₹  { totalDeliveryCharge.toLocaleString()} </span> )   : "Free"}
                   </span>
                 </div>
@@ -517,12 +525,22 @@ const CartItem = () => {
               </div>
             )}
 
-            <button
-              onClick={() => router.push("/checkout")}
-              className="w-full bg-emerald-700 text-white py-4 rounded-lg font-semibold hover:bg-emerald-800 transition-all shadow"
-            >
-              Proceed to Checkout
-            </button>
+      <button
+  onClick={() => {
+    if (inStockItems.length > 0) router.push("/checkout");
+  }}
+  disabled={inStockItems.length === 0}
+  className={`w-full py-4 rounded-lg font-semibold shadow transition-all ${
+    inStockItems.length === 0
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-emerald-700 hover:bg-emerald-800 text-white"
+  }`}
+>
+  {inStockItems.length === 0
+    ? "Proceed to Checkout"
+    : `Proceed to Checkout`}
+</button>
+
 
             <div className="flex items-center justify-center gap-2 text-sm text-slate-500 mt-3">
               <Lock size={14} />

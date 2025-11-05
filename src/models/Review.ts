@@ -1,15 +1,62 @@
-import mongoose, { model, models } from "mongoose"
+import mongoose, { Schema, model, models } from "mongoose";
 
-const reviewSchema = new mongoose.Schema ({
 
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    title:{type: String},
-    description:{ type: String, required: true},
-    rating:{type: Number,  default: 1},
-    images: [ {type: String} ]
+const ReviewSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
 
-})
+    productId: {
+      type: Schema.Types.ObjectId,
+      ref: "Product",
+      required: true,
+    },
 
-const Review = models.Review || model("Review", reviewSchema)
+    orderId: {
+      type: Schema.Types.ObjectId,
+      ref: "Order",
+    },
 
-export default Review
+    rating: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 5,
+    },
+
+    title: {
+      type: String,
+      trim: true,
+      maxlength: 100,
+    },
+
+    comment: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 1000,
+    },
+
+    images: [
+      {
+        type: String,
+      },
+    ],
+
+    isVerifiedPurchase: {
+      type: Boolean,
+      default: false,
+    }
+
+  },
+  { timestamps: true}
+);
+
+ReviewSchema.index({ userId: 1, productId: 1 }, { unique: true });
+
+const Review = models.Review || model("Review", ReviewSchema);
+
+export default Review;

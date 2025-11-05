@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dbConnect from "@/lib/dbConnect";
 import cloudinary from "@/lib/cloudinary";
 import Review from "@/models/Review";
+import Order from "@/models/Order"; 
 
 export async function GET(req: Request) {
   try {
@@ -10,50 +11,56 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
+    const productId = searchParams.get("productId");
 
-    let query = {};
-
-    if (userId && mongoose.Types.ObjectId.isValid(userId)) {
-      query = { userId };
-    }
+    const query: any = {};
+    if (userId && mongoose.Types.ObjectId.isValid(userId)) query.userId = userId;
+    if (productId && mongoose.Types.ObjectId.isValid(productId)) query.productId = productId;
 
     const reviews = await Review.find(query)
-      .sort({ createdAt: -1 })
-      .populate("userId", "name email");
+      .populate("userId", "name email")
+      .populate("productId", "name")
 
     return NextResponse.json({ success: true, data: reviews }, { status: 200 });
-  } catch (err: any) {
+  } catch (error: any) {
     return NextResponse.json(
-      { success: false, message: err.message || "Internal server error" },
+      { success: false, message: error.message || "Failed to fetch reviews" },
       { status: 500 }
     );
   }
 }
+
 
 export async function POST(req: Request) {
   try {
     await dbConnect();
 
     const formData = await req.formData();
-
     const userId = formData.get("userId") as string;
+    const productId = formData.get("productId") as string;
     const title = formData.get("title") as string;
-    const description = formData.get("description") as string;
+    const comment = formData.get("comment") as string;
     const rating = Number(formData.get("rating")) || 1;
+    const imageFiles = formData.getAll("images") as File[];
 
-    if (!userId || !description) {
+    if (!userId || !productId || !comment || !rating) {
       return NextResponse.json(
         { success: false, message: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    const imageFiles = formData.getAll("images") as File[];
-    const imageUrls: string[] = [];
+    const deliveredOrder = await Order.findOne({
+      userId,
+      "items.productId": productId,
+      orderStatus: "Delivered",
+    });
 
+    const isVerifiedPurchase = !!deliveredOrder;
+
+    const imageUrls: string[] = [];
     for (const file of imageFiles) {
       if (typeof file === "string") continue; 
-
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
@@ -61,9 +68,7 @@ export async function POST(req: Request) {
         const stream = cloudinary.uploader.upload_stream(
           {
             folder: "ecom_products/reviews",
-            public_id: file.name.replace(/\.[^/.]+$/, ""),
-            use_filename: true,
-            unique_filename: false,
+            resource_type: "image",
           },
           (error, result) => {
             if (error) reject(error);
@@ -78,21 +83,106 @@ export async function POST(req: Request) {
 
     const newReview = await Review.create({
       userId,
-      title,
-      description,
+      productId,
+      orderId: deliveredOrder?._id || null,
       rating,
+      title,
+      comment,
       images: imageUrls,
+      isVerifiedPurchase,
     });
 
     return NextResponse.json(
       { success: true, data: newReview },
       { status: 201 }
     );
-  } catch (err: any) {
-    console.error("Error uploading review:", err);
+  } catch (error: any) {
     return NextResponse.json(
-      { success: false, message: err.message || "Internal server error" },
+      { success: false, message: error.message || "Internal server error" },
       { status: 500 }
     );
+  }
+}
+
+
+
+export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+  try {
+    await dbConnect();
+    const { id } = params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ success: false, message: "Invalid review ID" }, { status: 400 });
+    }
+
+    const existingReview = await Review.findById(id);
+    if (!existingReview) {
+      return NextResponse.json({ success: false, message: "Review not found" }, { status: 404 });
+    }
+
+    const formData = await req.formData();
+    const title = formData.get("title") as string;
+    const comment = formData.get("comment") as string;
+    const rating = Number(formData.get("rating"));
+    const files = formData.getAll("images") as File[];
+    const existingImagesStr = formData.get("existingImages") as string;
+    const existingImages = existingImagesStr ? JSON.parse(existingImagesStr) : [];
+
+    const newImageUrls: string[] = [];
+    for (const file of files) {
+      if (typeof file === "string") continue;
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const uploaded = await new Promise<any>((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: "ecom_products/reviews",
+            use_filename: true,
+            unique_filename: true,
+            resource_type: "image",
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(buffer);
+      });
+      newImageUrls.push(uploaded.secure_url);
+    }
+
+    const updatedReview = await Review.findByIdAndUpdate(
+      id,
+      {
+        ...(title && { title }),
+        ...(comment && { comment }),
+        ...(rating && { rating }),
+        images: [...existingImages, ...newImageUrls],
+      },
+      { new: true }
+    );
+
+    return NextResponse.json({ success: true, data: updatedReview }, { status: 200 });
+  } catch (err: any) {
+    return NextResponse.json({ success: false, message: err.message || "Internal server error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+  try {
+    await dbConnect();
+    const { id } = params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ success: false, message: "Invalid review ID" }, { status: 400 });
+    }
+
+    const deletedReview = await Review.findByIdAndDelete(id);
+    if (!deletedReview) {
+      return NextResponse.json({ success: false, message: "Review not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, message: "Review deleted successfully" }, { status: 200 });
+  } catch (err: any) {
+    return NextResponse.json({ success: false, message: err.message || "Internal server error" }, { status: 500 });
   }
 }

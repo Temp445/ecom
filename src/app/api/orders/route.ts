@@ -5,6 +5,8 @@ import Product from "@/models/Product";
 import Address from "@/models/Address";
 import User from "@/models/User"; 
 import mongoose from "mongoose";
+import { placeOrder } from "@/lib/orderService";
+
 
 
 export async function GET(req: Request) {
@@ -58,33 +60,39 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Address does not belong to this user" }, { status: 403 });
     }
 
-    const validatedItems = await Promise.all(
-      items.map(async (item: any) => {
-        const product = await Product.findById(item.productId);
-        if (!product) {
-          throw new Error(`Product not found: ${item.productId}`);
-        }
+    // Filter out-of-stock items
+    const validatedItems = [];
+    for (const item of items) {
+      const product = await Product.findById(item.productId);
+      if (!product) continue; 
+      if (item.quantity > (product.stock || 0)) continue; 
 
-        if (item.quantity > product.stock) {
-          throw new Error(`Insufficient stock for product: ${product.name}`);
-        }
+      validatedItems.push({
+        productId: product._id,
+        productName: product.name,
+        productImage: product.thumbnail || "",
+        quantity: item.quantity,
+        priceAtPurchase: item.priceAtPurchase,
+        discountPriceAtPurchase: item.discountPriceAtPurchase || null,
+      });
+    }
 
-        return {
-          productId: product._id,
-          productName: product.name,
-          productImage: product.thumbnail || "",
-          quantity: item.quantity,
-          priceAtPurchase: item.priceAtPurchase,
-          discountPriceAtPurchase: item.discountPriceAtPurchase || null,
-        };
-      })
-    );
+    if (validatedItems.length === 0) {
+      return NextResponse.json(
+        { error: "No items available in stock to place the order" },
+        { status: 400 }
+      );
+    }
 
-    const order = await Order.create({
+    const order = await placeOrder({
       userId,
       items: validatedItems,
       shippingAddress,
-      totalAmount,
+      totalAmount: validatedItems.reduce(
+        (sum, it) =>
+          sum + (it.discountPriceAtPurchase ?? it.priceAtPurchase) * it.quantity,
+        0
+      ),
       paymentMethod,
       paymentStatus,
       orderStatus,
@@ -102,6 +110,7 @@ export async function POST(req: Request) {
     );
   }
 }
+
 
 
 

@@ -83,7 +83,12 @@ export default function Checkout() {
     })();
   }, [user]);
 
-const totalProductAmount = cartItems.reduce((sum, it) => {
+  const availableCartItems = cartItems.filter(
+  (item) => typeof item.productId === "object" && (item.productId.stock ?? 0) > 0
+);
+
+
+const totalProductAmount = availableCartItems.reduce((sum, it) => {
   const product = it.productId;
   if (!product) return sum;
   const price =
@@ -91,7 +96,7 @@ const totalProductAmount = cartItems.reduce((sum, it) => {
   return sum + price * it.quantity;
 }, 0);
 
-const totalDeliveryCharge = cartItems.reduce((sum, item) => {
+const totalDeliveryCharge = availableCartItems.reduce((sum, item) => {
   const product = item.productId;
   if (!product) return sum;
   return sum + (typeof product === "object" ? product.deliveryCharge || 0 : 0);
@@ -240,7 +245,6 @@ const totalAmount = totalProductAmount + totalDeliveryCharge;
                 {step === 3 && (
                   <OrderSummary
                     cartItems={cartItems}
-                    totalAmount={totalAmount}
                     onIncrease={handleIncrease}
                     onDecrease={handleDecrease}
                     onRemove={handleRemove}
@@ -270,8 +274,8 @@ const totalAmount = totalProductAmount + totalDeliveryCharge;
               <div className="space-y-4 mb-5">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">
-                    Price ({cartItems.length}{" "}
-                    {cartItems.length === 1 ? "item" : "items"})
+                    Price ({availableCartItems.length}{" "}
+                    {availableCartItems.length === 1 ? "item" : "items"})
                   </span>
                   <span className="font-semibold font-sans text-gray-900">
                     ₹{totalProductAmount.toLocaleString()}

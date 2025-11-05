@@ -4,15 +4,15 @@ import { Toaster } from "react-hot-toast";
 const Toast = () => {
   return (
     <Toaster
-      position="top-right"
+      position="top-center"
       reverseOrder={false}
       toastOptions={{
-        duration: 4000,
+        duration: 3000,
         style: {
           background: "#000000",
           color: "#fff",
           borderRadius: "8px",
-          fontSize: "14px",
+          fontSize: "15px",
         },
         success: {
           iconTheme: {
@@ -23,7 +23,7 @@ const Toast = () => {
             background: "#fffff",
             color: "#00000",
             borderRadius: "8px",
-            fontSize: "14px",
+            fontSize: "15px",
           },
         },
         error: {

@@ -99,7 +99,6 @@ export async function PUT(
     if (formData.get("isNewArrival") !== null)
       product.isNewArrival = isNewArrival;
 
-    // 🖼️ Thumbnail upload (if new file provided)
     const thumbnailFile = formData.get("thumbnail") as File | null;
     if (thumbnailFile) {
       const buffer = Buffer.from(await thumbnailFile.arrayBuffer());
@@ -121,7 +120,6 @@ export async function PUT(
       product.thumbnail = uploadedThumb.secure_url;
     }
 
-    // 🖼️ Gallery images upload (optional)
     const imageFiles = formData.getAll("images") as File[];
     if (imageFiles && imageFiles.length > 0) {
       const imageUrls: string[] = [];

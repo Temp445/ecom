@@ -24,7 +24,6 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ cart }, { status: 200 });
   } catch (err: any) {
-    console.error("Error fetching cart:", err);
     return NextResponse.json({ message: err.message || "Server error" }, { status: 500 });
   }
 }
@@ -80,7 +79,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, cart: updatedCart }, { status: 200 });
   } catch (err: any) {
-    console.error("merge cart error", err);
     return NextResponse.json({ error: err.message || "Server error" }, { status: 500 });
   }
 }
+
+

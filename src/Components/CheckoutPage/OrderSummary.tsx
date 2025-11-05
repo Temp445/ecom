@@ -6,13 +6,11 @@ import { CartItem } from "./Checkout";
 
 export default function OrderSummary({
   cartItems,
-  totalAmount,
   onIncrease,
   onDecrease,
   onRemove,
 }: {
   cartItems: CartItem[];
-  totalAmount: number;
   onIncrease: (id: string) => void;
   onDecrease: (id: string) => void;
   onRemove: (id: string) => void;
@@ -50,14 +48,10 @@ export default function OrderSummary({
               const id = it._id ?? idx.toString();
               const name =
                 it.name ??
-                (typeof it.productId === "object"
-                  ? it.productId.name
-                  : "Product");
+                (typeof it.productId === "object" ? it.productId.name : "Product");
               const img =
                 it.image ??
-                (typeof it.productId === "object"
-                  ? it.productId.thumbnail
-                  : "");
+                (typeof it.productId === "object" ? it.productId.thumbnail : "");
               const price =
                 typeof it.price === "number"
                   ? it.price
@@ -66,11 +60,21 @@ export default function OrderSummary({
                     ? it.productId.discountPrice
                     : it.productId.price ?? 0
                   : 0;
-
               const stock =
-                typeof it.productId === "object"
-                  ? it.productId.stock ?? Infinity
-                  : Infinity;
+                typeof it.productId === "object" ? it.productId.stock ?? 0 : 0;
+
+              if (stock <= 0) {
+                return (
+                  <div
+                    key={id}
+                    className="relative bg-red-50 rounded-xl p-3 hover:bg-slate-100 transition-all text-center text-red-400 "
+                  >
+                    <p className="font-medium text-sm">
+                      {name} is out of stock. <br />You cannot buy it now. Check later.
+                    </p>
+                  </div>
+                );
+              }
 
               return (
                 <div
@@ -138,9 +142,7 @@ export default function OrderSummary({
                         </div>
 
                         <div className="text-right">
-                          <p className="text-xs text-slate-500 mb-0.5">
-                            Subtotal
-                          </p>
+                          <p className="text-xs text-slate-500 mb-0.5">Subtotal</p>
                           <p className="font-medium text-slate-900 text-sm font-sans sm:text-base">
                             ₹{(price * it.quantity).toLocaleString()}
                           </p>

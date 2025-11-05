@@ -1,9 +1,9 @@
-import mongoose, { model, models } from "mongoose";
+import mongoose, {Schema, model, models } from "mongoose";
 
 const orderSchema = new mongoose.Schema(
   {
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
@@ -11,7 +11,7 @@ const orderSchema = new mongoose.Schema(
     items: [
       {
         productId: {
-          type: mongoose.Schema.Types.ObjectId,
+          type: Schema.Types.ObjectId,
           ref: "Product",
           required: true,
         },
@@ -23,7 +23,7 @@ const orderSchema = new mongoose.Schema(
     ],
 
     shippingAddress: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Address",
       required: true,
     },

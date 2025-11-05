@@ -5,12 +5,14 @@ import Address from "@/models/Address";
 
 export async function GET(
   req: Request,
-  { params }: { params: { orderId: string } }
+  { params }: { params: Promise<{ orderId: string }> }
 ) {
   try {
     await dbConnect();
 
-    const order = (await Order.findById(params.orderId)
+    const { orderId } = await params
+
+    const order = (await Order.findById(orderId)
       .populate("userId", "name email")
       .populate({
         path: "shippingAddress",
@@ -80,11 +82,12 @@ export async function GET(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { orderId: string } }
+  { params }: { params: Promise <{ orderId: string }> }
 ) {
   try {
     await dbConnect();
 
+    const { orderId } = await params
     const body = await req.json();
     const { orderStatus } = body;
 
@@ -113,7 +116,7 @@ export async function PATCH(
     }
 
     const updatedOrder = await Order.findByIdAndUpdate(
-      params.orderId,
+      orderId,
       updateData,
       { new: true }
     );

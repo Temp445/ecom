@@ -54,17 +54,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const newAddress = await Address.create({
-      userId: data.userId,
-      Name: data.Name,
-      MobileNumber: data.MobileNumber,
-      PinCode: data.PinCode,
-      Address: data.Address,
-      City: data.City,
-      LandMark: data.LandMark || "",
-      State: data.State || "",
-      Country: data.Country || "",
-    });
+    const newAddress = await Address.create(data);
 
     return NextResponse.json(
       {
@@ -81,3 +71,7 @@ export async function POST(req: Request) {
     );
   }
 }
+
+
+
+
