@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
 interface ReviewPageProps {
-  params: Promise<{ productId: string; orderId?: string }>; // params is now a Promise
+  params: Promise<{ productId: string; orderId?: string }>; 
 }
 
 interface ReviewData {
@@ -33,7 +33,6 @@ export default function ReviewPage({ params }: ReviewPageProps) {
   const [preview, setPreview] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Unwrap params (Next.js 15+)
   useEffect(() => {
     (async () => {
       const unwrapped = await params;
@@ -42,7 +41,6 @@ export default function ReviewPage({ params }: ReviewPageProps) {
     })();
   }, [params]);
 
-  // Fetch existing review
   useEffect(() => {
     if (!user?._id || !productId) return;
 
@@ -65,7 +63,6 @@ export default function ReviewPage({ params }: ReviewPageProps) {
     fetchReview();
   }, [user, productId]);
 
-  // Handle image upload
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     setImages([...images, ...files]);
@@ -86,7 +83,6 @@ export default function ReviewPage({ params }: ReviewPageProps) {
     }
   };
 
-  // Submit review
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!rating || !comment.trim()) {
@@ -127,7 +123,6 @@ export default function ReviewPage({ params }: ReviewPageProps) {
     }
   };
 
-  // Delete review
   const handleDelete = async () => {
     if (!existingReview) return;
     const confirmed = confirm("Are you sure you want to delete this review?");
@@ -162,7 +157,6 @@ export default function ReviewPage({ params }: ReviewPageProps) {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Rating */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Rating</label>
             <div className="flex gap-2">
@@ -178,26 +172,23 @@ export default function ReviewPage({ params }: ReviewPageProps) {
             </div>
           </div>
 
-          {/* Title */}
           <input
             type="text"
             placeholder="Title (optional)"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none"
+            className="w-full border rounded-lg px-3 py-2  outline-none"
           />
 
-          {/* Comment */}
           <textarea
             placeholder="Write your experience..."
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             rows={4}
-            className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none resize-none"
+            className="w-full border rounded-lg px-3 py-2  outline-none resize-none"
             required
           />
 
-          {/* Image Upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Upload Images</label>
             <label className="flex flex-col items-center justify-center w-full border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:border-emerald-500 transition">
@@ -213,7 +204,6 @@ export default function ReviewPage({ params }: ReviewPageProps) {
             </label>
           </div>
 
-          {/* Preview */}
           {preview.length > 0 && (
             <div className="grid grid-cols-3 gap-2 mt-3">
               {preview.map((url, i) => (
