@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
+import "@/models/Product";
 import Cart from "@/models/Cart";
-import { registerModels } from "@/models";
 import { verifyAuthToken } from "@/lib/auth";
 
 export async function GET(req: Request) {
   try {
     await dbConnect();
-    registerModels();
 
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
@@ -31,7 +30,6 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     await dbConnect();
-    registerModels();
 
     const authHeader = req.headers.get("authorization");
     const user = verifyAuthToken(authHeader);

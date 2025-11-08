@@ -1,5 +1,46 @@
 import mongoose, {Schema, model, models } from "mongoose";
 
+const orderItemSchema = new mongoose.Schema(
+  {
+    productId: {
+      type: Schema.Types.ObjectId,
+      ref: "Product",
+      required: true,
+    },
+    productName: { type: String, required: true },
+    productImage: { type: String },
+
+    quantity: { type: Number, required: true, min: 1 },
+    priceAtPurchase: { type: Number, required: true },
+    discountPriceAtPurchase: { type: Number, default: 0 },
+    deliveryCharge: { type: Number, default: 0 },
+
+    itemStatus: {
+      type: String,
+      enum: [
+        "Pending",     
+        "Packed",         
+        "Shipped",          
+        "Out for Delivery",
+        "Delivered",       
+        "Cancelled",      
+        "Returned",         
+        "Refunded",         
+      ],
+      default: "Pending",
+    },
+
+    trackingId: { type: String, default: null },
+    courierPartner: { type: String, default: null },
+    expectedDelivery: { type: Date },
+    deliveredAt: { type: Date },
+    cancelledAt: { type: Date },
+    returnRequestedAt: { type: Date },
+    refundedAt: { type: Date },
+  },
+  { _id: false }
+);
+
 const orderSchema = new mongoose.Schema(
   {
     userId: {
@@ -8,21 +49,7 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
 
-    items: [
-      {
-        productId: {
-          type: Schema.Types.ObjectId,
-          ref: "Product",
-          required: true,
-        },
-        productName: { type: String, required: true },
-        productImage: { type: String }, 
-        quantity: { type: Number, required: true, min: 1 },
-        priceAtPurchase: { type: Number, required: true },
-        discountPriceAtPurchase: { type: Number },
-        deliveryChargeAtPurchase: { type: Number },
-      },
-    ],
+     items: [orderItemSchema],
 
       shippingAddress: {
       Name: { type: String, required: true },
@@ -48,19 +75,10 @@ const orderSchema = new mongoose.Schema(
     },
     transactionId: { type: String },
 
-    orderStatus: {
-      type: String,
-      enum: ["Processing", "Shipped", "Delivered", "Cancelled"],
-      default: "Processing",
-    },
-
     orderDate: {
       type: Date,
       default: Date.now,
-    },
-    deliveredAt: {
-      type: Date,
-    },
+    }
   },
   { timestamps: true }
 );

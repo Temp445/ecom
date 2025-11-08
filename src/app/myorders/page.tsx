@@ -9,21 +9,22 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 type OrderItem = {
-  discountPriceAtPurchase: number;
-  priceAtPurchase: number;
   productId: string;
   productName: string;
   productImage: string;
   quantity: number;
-  price: number;
+  priceAtPurchase: number;
+  discountAtPurchase: number;
+  deliveryCharge: number;
+  itemStatus: string;
 };
 
 type Order = {
   _id: string;
-  userId: string;
+  orderId: string;
   orderDate: string;
   totalAmount: number;
-  orderStatus: string;
+  paymentMethod: string;
   items: OrderItem[];
 };
 
@@ -34,6 +35,7 @@ export default function OrdersPage() {
   const [reviewedProducts, setReviewedProducts] = useState<string[]>([]);
   const router = useRouter();
 
+  // Fetch Orders
   const fetchOrders = async (userId: string) => {
     try {
       setLoading(true);
@@ -46,6 +48,7 @@ export default function OrdersPage() {
     }
   };
 
+  // Fetch Reviewed Products
   const fetchReviewedProducts = async (userId: string, orders: Order[]) => {
     try {
       const reviewed: string[] = [];
@@ -75,13 +78,17 @@ export default function OrdersPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case "Pending":
       case "Processing":
         return "text-orange-600";
+      case "Packed":
       case "Shipped":
         return "text-blue-600";
       case "Delivered":
         return "text-green-600";
       case "Cancelled":
+      case "Returned":
+      case "Refunded":
         return "text-red-600";
       default:
         return "text-gray-600";
@@ -91,18 +98,28 @@ export default function OrdersPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex justify-center items-center">
-               <Loader2 className="w-10 h-10 text-gray-900 animate-spin" />
+        <Loader2 className="w-10 h-10 text-gray-900 animate-spin" />
       </div>
     );
   }
 
-  if (!orders.length) {
+  // Flatten orders into individual product entries
+  const flattenedItems = orders.flatMap((order) =>
+    order.items.map((item) => ({
+      ...item,
+      orderId: order._id,
+      orderDate: order.orderDate,
+      paymentMethod: order.paymentMethod,
+    }))
+  );
+
+  if (!flattenedItems.length) {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100 px-4">
         <ShoppingBag className="w-32 h-32 text-gray-300 mb-6" strokeWidth={1} />
         <h2 className="text-2xl font-medium text-gray-800 mb-2">No orders found</h2>
         <p className="text-gray-600 mb-8 text-center">
-          Looks like you haven't placed any orders yet
+          Looks like you haven’t placed any orders yet.
         </p>
         <button
           onClick={() => router.push("/")}
@@ -115,120 +132,100 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="bg-white">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <h1 className="text-3xl  font-medium text-gray-800">My Orders</h1>
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-6">
+        <h1 className="text-3xl font-medium text-gray-800 mb-6">My Orders</h1>
+
         <div className="space-y-4">
-          {orders.map((order) => (
-            <div key={order._id} className="bg-white rounded-2xl overflow-clip shadow-2xl">
-              
-              <div className="border-b bg-gray-950 text-gray-400 px-6 py-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-white">Order placed :</span>
-                      <span className="text-sm font-medium">
-                        {new Date(order.orderDate).toLocaleDateString("en-IN", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </span>
-                    </div>
-                    <div className="hidden sm:block w-px h-4 bg-gray-300"></div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-white">Total : </span>
-                      <span className="text-sm font-sans font-medium">₹{order.totalAmount.toLocaleString()}</span>
-                    </div>
+          {flattenedItems.map((item, index) => {
+            const hasReviewed = reviewedProducts.includes(item.productId);
+            const statusColor = getStatusColor(item.itemStatus);
+
+            return (
+              <div
+                key={`${item.productId}-${index}`}
+                className="bg-white rounded-2xl overflow-hidden shadow-lg border"
+              >
+                {/* Header */}
+                <div className="border-b bg-gray-900 text-gray-200 px-6 py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                    <span className="text-sm">
+                      Ordered on{" "}
+                      {new Date(item.orderDate).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
+                    <span className="hidden sm:block text-gray-400">•</span>
+                    <span className="text-sm">
+                      Payment: {item.paymentMethod.toUpperCase()}
+                    </span>
                   </div>
-                  <div className="text-sm text-gray-400">
-                    Order #{order._id}
-                  </div>
+                  <span className="text-xs text-gray-400">Order #{item.orderId}</span>
                 </div>
-              </div>
 
-              <Link href={`/myorders/${order._id}`} className="block hover:bg-gray-50 transition-colors">
-                {order.items.map((item, index) => {
-                  const hasReviewed = reviewedProducts.includes(item.productId);
-                  return (
-                    <div key={item.productId} className={index > 0 ? "border-t" : ""}>
-                      <div className="px-6 py-6">
-                        <div className="flex flex-col lg:flex-row gap-6">
-                          <div className="flex gap-4 flex-1">
-                            <div className="flex-shrink-0">
-                              <img
-                                src={item.productImage}
-                                alt={item.productName}
-                                className="w-28 h-28 object-contain"
-                              />
-                            </div>
-                            <div className="flex-1">
-                              <h3 className="text-base font-normal text-gray-800 mb-2 line-clamp-2">
-                                {item.productName}
-                              </h3>
-                              <div className="text-sm text-gray-600 mb-3">
-                                Qty: {item.quantity}
-                              </div>
-                              <div className="text-base font-sans font-medium text-gray-800">
-                                ₹{(
-                                     item.discountPriceAtPurchase && item.discountPriceAtPurchase > 0
-                                       ? item.discountPriceAtPurchase * item.quantity
-                                       : item.priceAtPurchase * item.quantity
-                                   ).toLocaleString()}
+                {/* Item Info */}
+                <Link href={`/myorders/${item.orderId}`} className="block hover:bg-gray-50 transition">
+                  <div className="p-6 flex flex-col sm:flex-row gap-4">
+                    <img
+                      src={item.productImage}
+                      alt={item.productName}
+                      className="w-24 h-24 sm:w-28 sm:h-28 object-contain flex-shrink-0"
+                    />
 
-                              </div>
-                            </div>
-                          </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-medium text-gray-800 line-clamp-2 mb-2">
+                        {item.productName}
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-2">Qty: {item.quantity}</p>
+                      <p className="text-base font-semibold text-gray-800">
+                        ₹
+                        {(
+                          item.discountAtPurchase > 0
+                            ? item.discountAtPurchase * item.quantity
+                            : item.priceAtPurchase * item.quantity
+                        ).toLocaleString()}
+                      </p>
+                    </div>
 
-                          <div className="items-end flex flex-col justify-between">
-                            <div>
-                              <div className={`flex items-center gap-2 mb-2 font-medium ${getStatusColor(order.orderStatus)}`}>
-                                <div className={`w-2 h-2 rounded-full ${
-                                  order.orderStatus === "Delivered" ? "bg-green-600" :
-                                  order.orderStatus === "Shipped" ? "bg-blue-600" :
-                                  order.orderStatus === "Processing" ? "bg-orange-600" :
-                                  "bg-red-600"
-                                }`}></div>
-                                <span className="text-sm">{order.orderStatus}</span>
-                              </div>
-                              {order.orderStatus === "Delivered" && (
-                                <div className="text-sm text-gray-600 mb-4">
-                                  Delivered on {new Date(order.orderDate).toLocaleDateString("en-IN", {
-                                    day: "numeric",
-                                    month: "short",
-                                  })}
-                                </div>
-                              )}
-                            </div>
-
-                            {order.orderStatus === "Delivered" && (
-                              <div className="flex flex-col gap-2">
-                                <button
-                                  onClick={() =>
-                                    router.push(`/review/${item.productId}?orderId=${order._id}`)
-                                  }
-                                  className="w-full text-sm border border-gray-300 rounded-sm text-blue-600 px-4 py-2.5 font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
-                                >
-                                  <Star className="w-4 h-4" />
-                                  {hasReviewed ? "Edit Review" : "Add Your Review"}
-                                </button>
-                              </div>
-                            )}
-                          </div>
+                    {/* Status + Review */}
+                    <div className="flex flex-col justify-between items-end">
+                      <div className={`font-medium ${statusColor}`}>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`w-2 h-2 rounded-full ${
+                              statusColor.includes("green")
+                                ? "bg-green-600"
+                                : statusColor.includes("blue")
+                                ? "bg-blue-600"
+                                : statusColor.includes("orange")
+                                ? "bg-orange-600"
+                                : "bg-red-600"
+                            }`}
+                          ></span>
+                          <span className="text-sm">{item.itemStatus}</span>
                         </div>
                       </div>
+
+                      {item.itemStatus === "Delivered" && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            router.push(`/review/${item.productId}?orderId=${item.orderId}`);
+                          }}
+                          className="mt-3 text-sm border border-gray-300 rounded-sm text-blue-600 px-4 py-2 font-medium hover:bg-gray-100 transition flex items-center gap-2"
+                        >
+                          <Star className="w-4 h-4" />
+                          {hasReviewed ? "Edit Review" : "Add Review"}
+                        </button>
+                      )}
                     </div>
-                  );
-                })}
-              </Link>
-            
-            </div>
-          ))}
+                  </div>
+                </Link>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

@@ -96,7 +96,9 @@ export default function ProductCard({
       
         </div>
 
-        <AddToCartButton product={product} userId={userId} className="text-white bg-gray-900 hover:bg-gray-950 transition disabled:opacity-50"  />
+        <AddToCartButton product={product} userId={userId}  disabled={product.stock <= 0} className={`text-white bg-gray-900 hover:bg-gray-950 transition disabled:opacity-50 ${
+    product.stock <= 0 ? "cursor-not-allowed opacity-60" : ""
+  }`} />
       </div>
     </div>
   );

@@ -64,7 +64,7 @@ export default function Payment({
               : typeof it.productId === "object"
               ? it.productId.price ?? 0
               : 0,
-        discountPriceAtPurchase:
+        discountAtPurchase:
           typeof it.discountPrice === "number"
             ? it.discountPrice
             : typeof it.productId === "object"
@@ -76,6 +76,7 @@ export default function Payment({
             : typeof it.productId === "object"
             ? it.productId.deliveryCharge ?? null
             : null,
+            
         })),
       
         shippingAddress: selectedAddressId,

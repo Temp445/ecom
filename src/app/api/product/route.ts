@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import dbConnect from "@/lib/dbConnect";
 import cloudinary from "@/lib/cloudinary";
+import "@/models/Category";
 import Product from "@/models/Product";
 import { generatePathUrl } from "@/lib/pathUrl";
 
@@ -10,7 +11,7 @@ export async function GET() {
     await dbConnect();
     const products = await Product.find()
       .sort({ createdAt: -1 })
-      // .populate("category", "_id Name");
+      .populate("category", "_id Name");
 
     return NextResponse.json({ success: true, data: products }, { status: 200 });
   } catch (err: any) {

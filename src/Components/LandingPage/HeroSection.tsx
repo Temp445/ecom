@@ -75,7 +75,6 @@ export default function LandingPage() {
               <div className="absolute bottom-0 left-0 w-full h-px bg-gray-900 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
             </button>
 
-            {/* Indicators */}
             <div className="flex gap-4">
               {slides.map((_, idx) => (
                 <button
@@ -92,7 +91,6 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Right Section - Image Slider */}
         <div className="w-1/2 relative overflow-hidden bg-white">
           <div
             className="flex transition-transform duration-700 ease-out h-full w-full"
@@ -112,10 +110,9 @@ export default function LandingPage() {
             ))}
           </div>
 
-          {/* Navigation Arrows */}
           <button
             onClick={prevSlide}
-            className="absolute left-12 top-1/2 -translate-y-1/2 z-10 group"
+            className="absolute left-12 top-1/2 -translate-y-1/2 CartProduct group"
           >
             <div className="w-14 h-14 border border-gray-300 rounded-full flex items-center justify-center group-hover:border-gray-900 group-hover:bg-white transition">
               <ChevronLeft size={24} className="text-gray-600 group-hover:text-gray-900 transition" />
@@ -124,14 +121,14 @@ export default function LandingPage() {
 
           <button
             onClick={nextSlide}
-            className="absolute right-12 top-1/2 -translate-y-1/2 z-10 group"
+            className="absolute right-12 top-1/2 -translate-y-1/2 CartProduct group"
           >
             <div className="w-14 h-14 border border-gray-300 rounded-full flex items-center justify-center group-hover:border-gray-900 group-hover:bg-white transition">
               <ChevronRight size={24} className="text-gray-600 group-hover:text-gray-900 transition" />
             </div>
           </button>
 
-          <div className="absolute bottom-12 left-12 z-10">
+          <div className="absolute bottom-12 left-12 CartProduct">
             <div className="flex items-center gap-3 bg-white px-6 py-4 rounded-full shadow-lg">
               <Zap size={18} className="text-gray-900" />
               <span className="text-sm font-medium text-gray-900">Heavy Duty Grade</span>

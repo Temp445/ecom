@@ -7,7 +7,6 @@ export async function GET() {
     await dbConnect();
 
     const orders = await Order.find()
-      .populate("userId", "firstName lastName email")
       .sort({ createdAt: -1 })
       .lean();
 
@@ -29,7 +28,8 @@ export async function GET() {
         productImage: item.productImage,
         quantity: item.quantity,
         priceAtPurchase: item.priceAtPurchase,
-        deliveryCharge: item.deliveryCharge ?? 0,
+        discountPriceAtPurchase: item.discountPriceAtPurchase ?? 0,
+        deliveryChargeAtPurchase: item.deliveryChargeAtPurchase ?? 0,
       })),
 
       shippingAddress: order.shippingAddress

@@ -15,6 +15,7 @@ interface AddToCartButtonProps {
   };
   userId?: string;
   quantity?: number;
+  disabled?: boolean;
   className?: string;
 }
 
@@ -22,6 +23,7 @@ export default function AddToCartButton({
   product,
   userId,
   quantity = 1,
+  disabled,
   className,
 }: AddToCartButtonProps) {
   const [loading, setLoading] = useState(false);

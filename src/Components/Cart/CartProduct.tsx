@@ -10,6 +10,7 @@ import {
   Lock,
   CheckCircle2,
   X,
+  TriangleAlert,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useCart } from "@/context/CartProvider";
@@ -28,11 +29,10 @@ interface Product {
   stock?: number;
   thumbnail?: string;
   images?: string[];
-  deliveryCharge?: number,
-
+  deliveryCharge?: number;
 }
 
-interface CartItemType {
+interface CartProductType {
   _id: string;
   productId?: Product | null;
   product?: Product | null;
@@ -40,13 +40,17 @@ interface CartItemType {
 }
 
 interface Cart {
-  items: CartItemType[];
+  items: CartProductType[];
 }
 
-const CartItem = () => {
+const CartProduct = () => {
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [showOutOfStockModal, setShowOutOfStockModal] = useState(false);
+  const [outOfStockItems, setOutOfStockItems] = useState<CartProductType[]>([]);
+const [savedForLater, setSavedForLater] = useState<CartProductType[]>([]);
+
   const { refreshCart } = useCart();
   const { user } = useAuth();
   const router = useRouter();
@@ -93,10 +97,10 @@ const CartItem = () => {
 
       try {
         const { data } = await axios.get(`/api/cart?userId=${user._id}`);
-        const dbCartItems = data.cart?.items || [];
+        const dbCartProducts = data.cart?.items || [];
 
-        const dbProductIds = dbCartItems.map(
-          (item: CartItemType) => item.productId?._id?.toString?.()
+        const dbProductIds = dbCartProducts.map((item: CartProductType) =>
+          item.productId?._id?.toString?.()
         );
 
         const uniqueLocalItems = localCart.filter(
@@ -130,8 +134,6 @@ const CartItem = () => {
     mergeLocalCart();
   }, [user?._id]);
 
-  
-
   const handleQuantityUpdate = async (itemId: string, newQty: number) => {
     if (newQty < 1) return;
 
@@ -152,7 +154,9 @@ const CartItem = () => {
       );
 
       if (user?._id) {
-        const res = await axios.put(`/api/cart/${itemId}`, { quantity: newQty });
+        const res = await axios.put(`/api/cart/${itemId}`, {
+          quantity: newQty,
+        });
         if (res.data.success) await refreshCart();
       } else {
         const guestCartString = localStorage.getItem("guestCart");
@@ -183,7 +187,10 @@ const CartItem = () => {
         if (res.data.success) {
           setCart((prev) =>
             prev
-              ? { ...prev, items: prev.items.filter((item) => item._id !== itemId) }
+              ? {
+                  ...prev,
+                  items: prev.items.filter((item) => item._id !== itemId),
+                }
               : prev
           );
           await refreshCart();
@@ -192,7 +199,9 @@ const CartItem = () => {
       } else {
         const guestCartString = localStorage.getItem("guestCart");
         let guestCart = guestCartString ? JSON.parse(guestCartString) : [];
-        guestCart = guestCart.filter((item: any) => item.product._id !== itemId);
+        guestCart = guestCart.filter(
+          (item: any) => item.product._id !== itemId
+        );
         localStorage.setItem("guestCart", JSON.stringify(guestCart));
         setCart((prev) =>
           prev
@@ -215,13 +224,26 @@ const CartItem = () => {
     }
   };
 
-const inStockItems = cart?.items.filter((item) => {
-  const product = item.productId || item.product;
-  return product && item.quantity <= (product.stock ?? 0);
-}) || [];
+  const handleCheckoutClick = () => {
+    const outOfStock =
+      cart?.items.filter((item) => {
+        const product = item.productId || item.product;
+        return !product || item.quantity > (product.stock ?? 0);
+      }) || [];
 
+    if (outOfStock.length > 0) {
+      setOutOfStockItems(outOfStock);
+      setShowOutOfStockModal(true);
+    } else {
+      router.push("/checkout");
+    }
+  };
 
-
+  const inStockItems =
+    cart?.items.filter((item) => {
+      const product = item.productId || item.product;
+      return product && item.quantity <= (product.stock ?? 0);
+    }) || [];
 
   if (loading)
     return (
@@ -231,7 +253,7 @@ const inStockItems = cart?.items.filter((item) => {
     );
 
   const isLoggedIn = !!user;
-    if (!cart?.items?.length) {
+  if (!cart?.items?.length) {
     return (
       <div className=" bg-slate-50 flex items-center justify-center px-4 py-12">
         <div className="text-center max-w-md">
@@ -304,11 +326,10 @@ const inStockItems = cart?.items.filter((item) => {
   }, 0);
 
   const totalDeliveryCharge = cart.items.reduce((sum, item) => {
-  const product = item.productId || item.product;
-  if (!product) return sum;
-  return sum + (product.deliveryCharge || 0);
-}, 0);
-
+    const product = item.productId || item.product;
+    if (!product) return sum;
+    return sum + (product.deliveryCharge || 0);
+  }, 0);
 
   const itemCount = cart.items.filter((i) => i.productId || i.product).length;
 
@@ -366,7 +387,8 @@ const inStockItems = cart?.items.filter((item) => {
               (product.discountPrice ?? 0) < product.price;
             const discountPercent = hasDiscount
               ? Math.round(
-                  ((product.price - product.discountPrice!) / product.price) * 100
+                  ((product.price - product.discountPrice!) / product.price) *
+                    100
                 )
               : 0;
 
@@ -502,20 +524,23 @@ const inStockItems = cart?.items.filter((item) => {
                   </span>
                 </div>
               )}
-   
-                <div className="flex justify-between text-slate-800">
-                  <span>Delivery</span>
-                  <span className="text-emerald-600 font-sans">
-                    {totalDeliveryCharge > 0 ? (<span> ₹  { totalDeliveryCharge.toLocaleString()} </span> )   : "Free"}
-                  </span>
-                </div>
-              
+
+              <div className="flex justify-between text-slate-800">
+                <span>Delivery</span>
+                <span className="text-emerald-600 font-sans">
+                  {totalDeliveryCharge > 0 ? (
+                    <span> ₹ {totalDeliveryCharge.toLocaleString()} </span>
+                  ) : (
+                    "Free"
+                  )}
+                </span>
+              </div>
             </div>
 
             <div className="flex justify-between items-center mb-6 pb-6 border-b border-slate-200">
               <span className="text-lg font-bold text-slate-800">Total</span>
               <span className="text-xl font-semibold font-sans">
-                ₹{(totalAmount + totalDeliveryCharge || 0).toLocaleString() }
+                ₹{(totalAmount + totalDeliveryCharge || 0).toLocaleString()}
               </span>
             </div>
 
@@ -524,33 +549,96 @@ const inStockItems = cart?.items.filter((item) => {
                 You're saving ₹{totalPriceSave.toLocaleString()} on this order!
               </div>
             )}
-
-      <button
-  onClick={() => {
-    if (inStockItems.length > 0) router.push("/checkout");
-  }}
-  disabled={inStockItems.length === 0}
-  className={`w-full py-4 rounded-lg font-semibold shadow transition-all ${
-    inStockItems.length === 0
-      ? "bg-gray-400 cursor-not-allowed"
-      : "bg-emerald-700 hover:bg-emerald-800 text-white"
-  }`}
->
-  {inStockItems.length === 0
-    ? "Proceed to Checkout"
-    : `Proceed to Checkout`}
-</button>
-
+            <button
+              onClick={handleCheckoutClick}
+              disabled={inStockItems.length === 0}
+              className={`w-full py-4 rounded-lg font-semibold shadow transition-all ${
+                inStockItems.length === 0
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-emerald-700 hover:bg-emerald-800 text-white"
+              }`}
+            >
+              Proceed to Checkout
+            </button>
 
             <div className="flex items-center justify-center gap-2 text-sm text-slate-500 mt-3">
               <Lock size={14} />
               <span>Secure checkout</span>
             </div>
           </div>
+          {showOutOfStockModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative animate-in fade-in zoom-in-95 duration-200">
+                <h3 className="text-lg sm:text-xl  text-gray-900 mb-2 flex items-center gap-2">
+                  <TriangleAlert className="fill-yellow-400" /> Some items are
+                  out of stock
+                </h3>
+                <p className="text-gray-600 text-sm mb-4">
+                  The following items are currently unavailable. Would you like
+                  to remove them and continue to checkout?
+                </p>
+
+                <div className="max-h-48 overflow-y-auto mb-5 space-y-3">
+                  {outOfStockItems.map((item) => {
+                    const product = item.productId || item.product;
+                    if (!product) return null;
+                    return (
+                      <div
+                        key={product._id}
+                        className="flex items-center gap-3 border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition"
+                      >
+                        <img
+                          src={
+                            product.thumbnail ||
+                            product.images?.[0] ||
+                            "/placeholder.png"
+                          }
+                          alt={product.name}
+                          className="w-14 h-14 object-contain rounded-md bg-gray-50"
+                        />
+                        <span className="font-medium text-gray-800 text-sm line-clamp-2">
+                          {product.name}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="flex justify-end gap-3 pt-2">
+                  <button
+                    onClick={() => setShowOutOfStockModal(false)}
+                    className="px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 font-medium text-sm transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={async () => {
+                      try {
+                        for (const item of outOfStockItems) {
+                          const product = item.productId || item.product;
+                          if (!product) continue;
+                          await handleDelete(
+                            user?._id ? item._id : product._id
+                          );
+                        }
+                        setShowOutOfStockModal(false);
+                        router.push("/checkout");
+                      } catch {
+                        toast.error("Failed to remove out of stock items");
+                      }
+                    }}
+                    className="px-5 py-2.5 rounded-lg bg-gray-900 text-white hover:bg-gray-950 font-medium text-sm transition"
+                  >
+                    Yes, Continue
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-export default CartItem;
+export default CartProduct;
