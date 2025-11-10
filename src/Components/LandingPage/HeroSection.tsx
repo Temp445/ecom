@@ -50,16 +50,18 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-fit bg-white overflow-hidden">
+    <div className="min-h-fit bg-white overflow-hidden container mx-auto">
 
-      <div className="relative h-[85vh] flex items-stretch overflow-hidden">
+      <div className="relative h-fit flex items-stretch overflow-hidden">
 
-        <div className="w-1/2 flex flex-col justify-between p-14">
+        <div className="w-1/2 flex flex-col justify-between xl:p-6 2xl:p-14">
                       
           <div className="mb-20">
-            <h1 className="text-6xl font-semibold text-gray-900 leading-tight mb-6 transition-all duration-500">
-              High-Pressure <span className='text-gray-500'>Hydraulic Solutions</span>
+            <h1 className=" text-5xl 2xl:text-6xl font-medium text-gray-900 leading-tight transition-all duration-500">
+              High-Pressure 
             </h1>
+             <h2 className='text-gray-500 mb-6 text-5xl 2xl:text-6xl font-medium'>Hydraulic Solutions</h2>
+
 
             <p className="text-gray-600 text-lg font-light leading-relaxed max-w-2xl transition-all duration-500">
               Designed for maximum strength and endurance, our cylinders deliver consistent performance across industrial, mobile, and heavy-machinery applications. Built with precision components and strict quality control for long service life.
@@ -104,7 +106,7 @@ export default function LandingPage() {
                 <img
                   src={item.image}
                   alt="Hydraulic Cylinder"
-                  className="w-full h-full object-contain"
+                  className="w-full h-96 object-contain"
                 />
               </div>
             ))}

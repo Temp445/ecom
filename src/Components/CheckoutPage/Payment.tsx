@@ -41,8 +41,8 @@ export default function Payment({
     if (!cartItems.length) return toast.error("Your cart is empty");
 
     setPlacingOrder(true);
+
     try {
-      const orderDate = new Date();
       const payload = {
         userId: user._id,
         items: cartItems.map((it) => ({
@@ -50,35 +50,26 @@ export default function Payment({
             typeof it.productId === "string"
               ? it.productId
               : it.productId?._id,
-          productName:
-            it.name ??
-            (typeof it.productId === "object" ? it.productId.name : "Product"),
-          productImage:
-            it.image ??
-            (typeof it.productId === "object" ? it.productId.thumbnail : ""),
           quantity: Number(it.quantity),
-
           priceAtPurchase:
             typeof it.price === "number"
               ? it.price
               : typeof it.productId === "object"
               ? it.productId.price ?? 0
               : 0,
-        discountAtPurchase:
-          typeof it.discountPrice === "number"
-            ? it.discountPrice
-            : typeof it.productId === "object"
-            ? it.productId.discountPrice ?? null
-            : null,
-        deliveryChargeAtPurchase: 
-              typeof it.deliveryCharge === "number"
-            ? it.deliveryCharge
-            : typeof it.productId === "object"
-            ? it.productId.deliveryCharge ?? null
-            : null,
-            
+          discountAtPurchase:
+            typeof it.discountPrice === "number"
+              ? it.discountPrice
+              : typeof it.productId === "object"
+              ? it.productId.discountPrice ?? null
+              : null,
+          deliveryChargeAtPurchase:
+            typeof it.deliveryCharge === "number"
+              ? it.deliveryCharge
+              : typeof it.productId === "object"
+              ? it.productId.deliveryCharge ?? null
+              : null,
         })),
-      
         shippingAddress: selectedAddressId,
         totalAmount,
         paymentMethod,
@@ -87,20 +78,24 @@ export default function Payment({
           paymentMethod === "Online"
             ? `TXN-${Date.now()}-${Math.floor(Math.random() * 1000)}`
             : undefined,
-        orderStatus: "Processing",
-        orderDate,
       };
 
-      const res = await axios.post("/api/orders", payload);
+      const res = await axios.post("/api/orders", payload, {
+        validateStatus: () => true, 
+      });
 
-      if (res.status === 201 || res.data?.success) {
-        toast.success("Order placed successfully");
-        router.push("/cart");
+      if (res.status === 201 && res.data?.success) {
+        toast.success("Order placed successfully!");
+        router.push("/myorders"); 
       } else {
-        toast.error(res.data?.error || "Failed to place order");
+        const msg =
+          res.data?.error || res.data?.message || "Failed to place order.";
+        toast.error(msg);
+        console.error("Order API Error:", res);
       }
     } catch (err: any) {
-      toast.error(err?.response?.data?.error || "Order creation failed");
+      console.error("Network/API error while placing order:", err);
+      toast.error("Failed to communicate with order API. Please try again.");
     } finally {
       setPlacingOrder(false);
     }
@@ -132,8 +127,12 @@ export default function Payment({
           <CreditCard className="text-white w-5 h-5" />
         </div>
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">Payment Method</h2>
-          <p className="text-sm text-gray-500">Choose how you’d like to pay</p>
+          <h2 className="text-xl font-semibold text-gray-900">
+            Payment Method
+          </h2>
+          <p className="text-sm text-gray-500">
+            Choose how you’d like to pay
+          </p>
         </div>
       </div>
 
@@ -162,9 +161,7 @@ export default function Payment({
                 name="payment"
                 value={option.id}
                 checked={isSelected}
-                onChange={() =>
-                  setPaymentMethod(option.id as "COD" | "Online")
-                }
+                onChange={() => setPaymentMethod(option.id as "COD" | "Online")}
                 className="sr-only"
               />
 

@@ -6,7 +6,6 @@ import Address from "@/models/Address";
 import User from "@/models/User"; 
 import mongoose from "mongoose";
 
-// ✅ GET — fetch orders (all or by userId)
 export async function GET(req: Request) {
   try {
     await dbConnect();
@@ -20,7 +19,7 @@ export async function GET(req: Request) {
     }
 
     const orders = await Order.find(query)
-      .populate("userId", "name email") // populate user info
+      .populate("userId", "name email") 
       .sort({ createdAt: -1 });
 
     return NextResponse.json({ success: true, data: orders }, { status: 200 });
@@ -33,7 +32,6 @@ export async function GET(req: Request) {
   }
 }
 
-// ✅ POST — create new order
 export async function POST(req: Request) {
   try {
     await dbConnect();
@@ -45,13 +43,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Check if user exists
     const userExists = await User.findById(userId);
     if (!userExists) {
       return NextResponse.json({ error: "User does not exist" }, { status: 400 });
     }
 
-    // Get address
     const addressData = await Address.findById(shippingAddress);
     if (!addressData) {
       return NextResponse.json({ error: "Invalid address" }, { status: 400 });
@@ -60,7 +56,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Address does not belong to this user" }, { status: 403 });
     }
 
-    // Build shipping address
     const address = {
       Name: addressData.Name,
       MobileNumber: addressData.MobileNumber,
@@ -72,7 +67,6 @@ export async function POST(req: Request) {
       Country: addressData.Country,
     };
 
-    // Validate items (check stock)
     const validatedItems = [];
     for (const item of items) {
       const product = await Product.findById(item.productId);
@@ -98,7 +92,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Create order
     const order = await Order.create({
       userId,
       items: validatedItems,
@@ -113,7 +106,6 @@ export async function POST(req: Request) {
       { status: 201 }
     );
   } catch (error: any) {
-    console.error("Error creating order:", error);
     return NextResponse.json(
       { error: error.message || "Failed to create order" },
       { status: 500 }

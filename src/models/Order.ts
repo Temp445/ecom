@@ -15,19 +15,10 @@ const orderItemSchema = new mongoose.Schema(
     discountPriceAtPurchase: { type: Number, default: 0 },
     deliveryCharge: { type: Number, default: 0 },
 
-    itemStatus: {
+    orderStatus: {
       type: String,
-      enum: [
-        "Pending",     
-        "Packed",         
-        "Shipped",          
-        "Out for Delivery",
-        "Delivered",       
-        "Cancelled",      
-        "Returned",         
-        "Refunded",         
-      ],
-      default: "Pending",
+      enum: ["Processing", "Shipped", "Delivered", "Cancelled"],
+      default: "Processing",
     },
 
     trackingId: { type: String, default: null },
@@ -37,8 +28,7 @@ const orderItemSchema = new mongoose.Schema(
     cancelledAt: { type: Date },
     returnRequestedAt: { type: Date },
     refundedAt: { type: Date },
-  },
-  { _id: false }
+  }
 );
 
 const orderSchema = new mongoose.Schema(
@@ -74,6 +64,7 @@ const orderSchema = new mongoose.Schema(
       default: "Pending",
     },
     transactionId: { type: String },
+
 
     orderDate: {
       type: Date,

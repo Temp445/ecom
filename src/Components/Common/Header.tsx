@@ -7,7 +7,7 @@ import { RiCustomerService2Fill } from "react-icons/ri";
 const Header = () => {
   return (
     <header className="w-full shadow-md bg-white border border-gray-200">
-      <div className="container mx-auto px-4 lg:px-8 py-0.5 flex items-center justify-between">
+      <div className="container mx-auto px-4 xl:px-8 py-0.5 flex items-center justify-between">
         <div className="flex gap-2 text-xs items-center" >
      <TbMailFilled className="text-xl text-gray-700" />  hydraulic@gmail.com
         </div>

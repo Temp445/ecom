@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import Order from "@/models/Order";
+import Address from "@/models/Address";
 
 export async function GET(
   req: Request,
@@ -9,78 +10,76 @@ export async function GET(
   try {
     await dbConnect();
 
-    const { orderId } = await params;
+    const { orderId } = await params
 
-    const order = await Order.findById(orderId)
-      .populate("userId", "firstName lastName email");
+    const order = (await Order.findById(orderId)
+      .populate("userId", "name email")
+      .populate({
+        path: "shippingAddress",
+        model: Address,
+        select:
+          "Name MobileNumber PinCode Address City LandMark State Country",
+      })) 
 
     if (!order)
       return NextResponse.json({ message: "Order not found" }, { status: 404 });
 
     const formattedOrder = {
-      _id: order._id.toString(),
-      orderId: order.orderId,
-      user: order.userId
+      _id: order?._id?.toString() || "",
+      user: order?.userId
         ? {
-            _id: order.userId._id.toString(),
-            name: `${order.userId.firstName || ""} ${order.userId.lastName || ""}`.trim(),
-            email: order.userId.email,
+            _id: order.userId?._id?.toString() || "",
+            name: order.userId?.name || "",
+            email: order.userId?.email || "",
           }
         : null,
 
-      items: order.items.map((item: any) => ({
-        productId: item.productId?.toString(),
-        productName: item.productName,
-        productImage: item.productImage,
-        quantity: item.quantity,
-        priceAtPurchase: item.priceAtPurchase,
-        discountAtPurchase: item.discountAtPurchase || 0,
-        deliveryCharge: item.deliveryCharge || 0,
-        itemStatus: item.itemStatus,
-        courierPartner: item.courierPartner,
-        trackingId: item.trackingId,
-        expectedDelivery: item.expectedDelivery,
-        deliveredAt: item.deliveredAt,
-        cancelledAt: item.cancelledAt,
-      })),
+      items: Array.isArray(order?.items)
+        ? order.items.map((item: any) => ({
+            productId: item.productId?.toString() || "",
+            productName: item.productName || "",
+            productImage: item.productImage || "",
+            quantity: item.quantity || 0,
+            priceAtPurchase: item.priceAtPurchase || 0,
+          }))
+        : [],
 
-      shippingAddress: order.shippingAddress
+      shippingAddress: order?.shippingAddress
         ? {
-            name: order.shippingAddress.name,
-            mobileNumber: order.shippingAddress.mobileNumber,
-            pinCode: order.shippingAddress.pinCode,
-            address: order.shippingAddress.address,
-            city: order.shippingAddress.city,
-            state: order.shippingAddress.state,
-            landmark: order.shippingAddress.landmark,
-            country: order.shippingAddress.country,
-            addressType: order.shippingAddress.addressType,
+            _id: order.shippingAddress?._id?.toString() || "",
+            name: order.shippingAddress?.Name || "",
+            mobileNumber: order.shippingAddress?.MobileNumber || "",
+            pinCode: order.shippingAddress?.PinCode || "",
+            address: order.shippingAddress?.Address || "",
+            city: order.shippingAddress?.City || "",
+            landMark: order.shippingAddress?.LandMark || "",
+            state: order.shippingAddress?.State || "",
+            country: order.shippingAddress?.Country || "",
           }
         : null,
 
-      totalAmount: order.totalAmount,
-      payableAmount: order.payableAmount,
-      couponCode: order.couponCode,
-      couponDiscount: order.couponDiscount,
-      paymentMethod: order.paymentMethod,
-      paymentStatus: order.paymentStatus,
-      transactionId: order.transactionId,
-      logisticsProvider: order.logisticsProvider,
-      expectedDelivery: order.expectedDelivery,
-      orderDate: order.orderDate,
-      createdAt: order.createdAt,
-      updatedAt: order.updatedAt,
+      totalAmount: order?.totalAmount || 0,
+      paymentMethod: order?.paymentMethod || "",
+      paymentStatus: order?.paymentStatus || "",
+      transactionId: order?.transactionId || "",
+      orderStatus: order?.orderStatus || "",
+      orderDate: order?.orderDate || null,
+      deliveredAt: order?.deliveredAt || null,
+      createdAt: order?.createdAt || null,
+      updatedAt: order?.updatedAt || null,
     };
 
-    return NextResponse.json({ success: true, data: formattedOrder }, { status: 200 });
+    return NextResponse.json(formattedOrder, { status: 200 });
   } catch (error: any) {
     console.error("Error fetching order:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to fetch order details", error: error.message },
+      { message: "Failed to fetch order details", error: error.message },
       { status: 500 }
     );
   }
 }
+
+
 
 export async function PATCH(
   req: Request,
@@ -91,42 +90,44 @@ export async function PATCH(
 
     const { orderId } = await params;
     const body = await req.json();
-    const { itemUpdates, paymentStatus, logisticsProvider, trackingId, expectedDelivery } = body;
 
+    const {
+      orderStatus,
+      trackingId,
+      courierPartner,
+      expectedDelivery,
+      deliveredAt,
+      cancelledAt,
+      returnRequestedAt,
+      refundedAt,
+    } = body;
+
+    // Find the order
     const order = await Order.findById(orderId);
-    if (!order)
+    if (!order) {
       return NextResponse.json({ message: "Order not found" }, { status: 404 });
-
-    // ✅ Update item statuses if provided
-    if (Array.isArray(itemUpdates)) {
-      order.items.forEach((item: any) => {
-        const update = itemUpdates.find((u: any) => String(u.productId) === String(item.productId));
-        if (update) {
-          if (update.itemStatus) item.itemStatus = update.itemStatus;
-          if (update.trackingId) item.trackingId = update.trackingId;
-          if (update.courierPartner) item.courierPartner = update.courierPartner;
-          if (update.expectedDelivery) item.expectedDelivery = new Date(update.expectedDelivery);
-        }
-      });
     }
 
-    // ✅ Update global logistics info if provided
-    if (logisticsProvider) order.logisticsProvider = logisticsProvider;
-    if (expectedDelivery) order.expectedDelivery = new Date(expectedDelivery);
-
-    // ✅ Update payment status if provided
-    if (paymentStatus) order.paymentStatus = paymentStatus;
+    // Update main order fields
+    if (orderStatus) order.items.forEach((item: { orderStatus: any; }) => (item.orderStatus = orderStatus));
+    if (trackingId) order.items.forEach((item: { trackingId: any; }) => (item.trackingId = trackingId));
+    if (courierPartner) order.items.forEach((item: { courierPartner: any; }) => (item.courierPartner = courierPartner));
+    if (expectedDelivery) order.items.forEach((item: { expectedDelivery: any; }) => (item.expectedDelivery = expectedDelivery));
+    if (deliveredAt) order.items.forEach((item: { deliveredAt: any; }) => (item.deliveredAt = deliveredAt));
+    if (cancelledAt) order.items.forEach((item: { cancelledAt: any; }) => (item.cancelledAt = cancelledAt));
+    if (returnRequestedAt) order.items.forEach((item: { returnRequestedAt: any; }) => (item.returnRequestedAt = returnRequestedAt));
+    if (refundedAt) order.items.forEach((item: { refundedAt: any; }) => (item.refundedAt = refundedAt));
 
     await order.save();
 
     return NextResponse.json(
-      { success: true, message: "Order updated successfully", order },
+      { message: "Order updated successfully", order },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error updating order:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to update order", error: error.message },
+      { message: "Internal Server Error", error: String(error) },
       { status: 500 }
     );
   }

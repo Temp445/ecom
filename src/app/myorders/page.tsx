@@ -9,19 +9,19 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 type OrderItem = {
+  _id: string; // ✅ ensure itemId exists here
   productId: string;
   productName: string;
   productImage: string;
   quantity: number;
   priceAtPurchase: number;
-  discountAtPurchase: number;
-  deliveryCharge: number;
-  itemStatus: string;
+  discountPriceAtPurchase?: number;
+  deliveryCharge?: number;
+  orderStatus: string;
 };
 
 type Order = {
   _id: string;
-  orderId: string;
   orderDate: string;
   totalAmount: number;
   paymentMethod: string;
@@ -55,7 +55,9 @@ export default function OrdersPage() {
       for (const order of orders) {
         for (const item of order.items) {
           try {
-            const res = await axios.get(`/api/review?userId=${userId}&productId=${item.productId}`);
+            const res = await axios.get(
+              `/api/review?userId=${userId}&productId=${item.productId}`
+            );
             if (res.data.data?.length > 0) reviewed.push(item.productId);
           } catch (err) {
             console.error(err);
@@ -103,7 +105,7 @@ export default function OrdersPage() {
     );
   }
 
-  // Flatten orders into individual product entries
+  // Flatten all items from all orders into a single array
   const flattenedItems = orders.flatMap((order) =>
     order.items.map((item) => ({
       ...item,
@@ -139,34 +141,27 @@ export default function OrdersPage() {
         <div className="space-y-4">
           {flattenedItems.map((item, index) => {
             const hasReviewed = reviewedProducts.includes(item.productId);
-            const statusColor = getStatusColor(item.itemStatus);
+            const statusColor = getStatusColor(item.orderStatus);
 
             return (
-              <div
-                key={`${item.productId}-${index}`}
-                className="bg-white rounded-2xl overflow-hidden shadow-lg border"
-              >
-                {/* Header */}
-                <div className="border-b bg-gray-900 text-gray-200 px-6 py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                    <span className="text-sm">
-                      Ordered on{" "}
-                      {new Date(item.orderDate).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </span>
-                    <span className="hidden sm:block text-gray-400">•</span>
-                    <span className="text-sm">
-                      Payment: {item.paymentMethod.toUpperCase()}
-                    </span>
-                  </div>
+              <div key={index} className="bg-white border rounded-lg shadow">
+                <div className="bg-gray-700 text-gray-200 px-6 py-3 flex justify-between items-center">
+                  <span className="text-xs">
+                    Ordered on:{" "}
+                    {new Date(item.orderDate).toLocaleDateString("en-IN", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </span>
                   <span className="text-xs text-gray-400">Order #{item.orderId}</span>
                 </div>
 
-                {/* Item Info */}
-                <Link href={`/myorders/${item.orderId}`} className="block hover:bg-gray-50 transition">
+                {/* ✅ link to single product order detail */}
+                <Link
+                  href={`/myorders/${item.orderId}/item/${item._id}`}
+                  className="block hover:bg-gray-50 transition"
+                >
                   <div className="p-6 flex flex-col sm:flex-row gap-4">
                     <img
                       src={item.productImage}
@@ -179,17 +174,15 @@ export default function OrdersPage() {
                         {item.productName}
                       </h3>
                       <p className="text-sm text-gray-600 mb-2">Qty: {item.quantity}</p>
-                      <p className="text-base font-semibold text-gray-800">
+                      <p className="text-base font-semibold text-gray-800 font-sans">
                         ₹
                         {(
-                          item.discountAtPurchase > 0
-                            ? item.discountAtPurchase * item.quantity
-                            : item.priceAtPurchase * item.quantity
+                          (item.discountPriceAtPurchase || item.priceAtPurchase) *
+                          item.quantity
                         ).toLocaleString()}
                       </p>
                     </div>
 
-                    {/* Status + Review */}
                     <div className="flex flex-col justify-between items-end">
                       <div className={`font-medium ${statusColor}`}>
                         <div className="flex items-center gap-2">
@@ -204,11 +197,11 @@ export default function OrdersPage() {
                                 : "bg-red-600"
                             }`}
                           ></span>
-                          <span className="text-sm">{item.itemStatus}</span>
+                          <span className="text-sm">{item.orderStatus}</span>
                         </div>
                       </div>
 
-                      {item.itemStatus === "Delivered" && (
+                      {item.orderStatus === "Delivered" && (
                         <button
                           onClick={(e) => {
                             e.preventDefault();

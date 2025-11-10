@@ -54,7 +54,7 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white sticky inset-0.5 top-0 z-10 border-b border-gray-100">
-      <div className="container mx-auto px-4 sm:px-4 xl:px-6 ">
+      <div className="container mx-auto px-4 sm:px-4 lg:px-0 xl:px-6 ">
         <div className="flex justify-between items-center h-16 ">
           <Link href="/" className="flex flex-col items-start sm:items-center flex-shrink-0 min-w-0">
             <div className="flex items-end">
