@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Edit, Trash2, Plus, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
-export default function ProductDisplayPage() {
+const ProductPage = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -46,18 +46,14 @@ export default function ProductDisplayPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-      </div>
-    );
+  if (!loading && products.length === 0) {
+    return <p className="text-center text-gray-500">No products found.</p>;
   }
 
   return (
     <div className="p-6">
-
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">All Products</h1>
+        <h1 className="text-2xl font-medium text-slate-800">All Products</h1>
         <Link
           href="/admin/product/upload"
           className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg transition"
@@ -66,10 +62,43 @@ export default function ProductDisplayPage() {
         </Link>
       </div>
 
-      {products.length === 0 ? (
-        <p className="text-center text-gray-500">No products found.</p>
+      <div className="flex gap-4 mb-6">
+        <div className="p-6 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg shadow-md flex flex-col justify-center h-28">
+          <p className="text-gray-700 font-medium text-sm mb-2">
+            Total Products
+          </p>
+          <span className="font-bold text-2xl text-blue-900">
+            {products.length}
+          </span>
+        </div>
+
+        <div className="p-6 bg-gradient-to-r from-red-50 to-red-100 rounded-lg shadow-md  flex flex-col justify-center h-28">
+          <p className="text-red-700 font-medium text-sm mb-2">Out of Stock</p>
+          <span className="font-bold text-2xl text-red-900">
+            {products.filter((p) => p.stock <= 0).length}
+          </span>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, idx) => (
+            <div
+              key={idx}
+              className="bg-white border border-gray-400 rounded-xl shadow-sm p-4 animate-pulse"
+            >
+              <div className="aspect-square rounded-lg bg-gray-300 mb-3"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 mb-2"></div>
+              <div className="h-4 bg-gray-300 rounded w-full mb-4"></div>
+              <div className="flex justify-end gap-2 mt-auto">
+                <div className="h-8 w-8 bg-gray-300 rounded"></div>
+                <div className="h-8 w-8 bg-gray-300 rounded"></div>
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {products.map((product) => (
             <div
               key={product._id}
@@ -95,23 +124,23 @@ export default function ProductDisplayPage() {
               <p className="text-sm text-gray-500 line-clamp-2 mb-2">
                 {product.description || "No description available."}
               </p>
+              <div>{product.stock > 0 ? <span className="text-emerald-600 text-sm">Stock</span> : <span className="text-red-500 text-sm">Out of Stock</span>}</div>
 
               <div className="mt-auto">
                 <div className="flex justify-between items-center">
                   <div className="flex gap-3 items-center">
-                    <p className="text-slate-800 font-semibold">
+                    <p className="text-slate-800 font-semibold font-sans">
                       ₹
                       {product.discountPrice
                         ? product.discountPrice.toLocaleString()
                         : product.price?.toLocaleString()}
                     </p>
                     {product.discountPrice > 0 && (
-                      <p className="text-gray-600 text-xs line-through">
+                      <p className="text-gray-600 text-xs line-through font-sans">
                         ₹{product.price?.toLocaleString()}
                       </p>
                     )}
                   </div>
-
                 </div>
 
                 <div className="flex justify-end gap-2 mt-3">
@@ -129,7 +158,10 @@ export default function ProductDisplayPage() {
                     title="Delete"
                   >
                     {deleting === product.pathUrl ? (
-                      <Loader2 size={16} className="animate-spin text-red-700" />
+                      <Loader2
+                        size={16}
+                        className="animate-spin text-red-700"
+                      />
                     ) : (
                       <Trash2 size={16} className="text-red-700" />
                     )}
@@ -142,4 +174,6 @@ export default function ProductDisplayPage() {
       )}
     </div>
   );
-}
+};
+
+export default ProductPage;

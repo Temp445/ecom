@@ -19,13 +19,13 @@ interface AddToCartButtonProps {
   className?: string;
 }
 
-export default function AddToCartButton({
+const AddToCartButton = ({
   product,
   userId,
   quantity = 1,
   disabled,
   className,
-}: AddToCartButtonProps) {
+}: AddToCartButtonProps) => {
   const [loading, setLoading] = useState(false);
   const { refreshCart } = useCart();
   const Router = useRouter()
@@ -91,7 +91,7 @@ export default function AddToCartButton({
   return (
     <button
       onClick={handleAddToCart}
-      disabled={loading}
+      disabled={loading || disabled}
       className={`flex items-center justify-center gap-2  px-4 py-2 rounded w-full ${className}`}
     >
       {loading ? (
@@ -103,3 +103,5 @@ export default function AddToCartButton({
     </button>
   );
 }
+
+export default AddToCartButton;

@@ -1,16 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
-
+import Link from "next/link";
 
 const LoginPage = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      router.push("/");
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -38,13 +45,11 @@ const LoginPage = () => {
         return;
       }
 
-      //  Store user data
       localStorage.setItem("token", data.token);
       localStorage.setItem("userId", data.user._id);
       localStorage.setItem("role", data.user.role);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      //  Merge guest cart into user cart (if exists)
       const guestCart = JSON.parse(localStorage.getItem("guestCart") || "[]");
 
       if (guestCart.length > 0) {
@@ -63,7 +68,6 @@ const LoginPage = () => {
             }),
           });
 
-          // Clear guest cart after merging
           localStorage.removeItem("guestCart");
         } catch (err) {
           console.error("Cart merge error:", err);
@@ -74,7 +78,7 @@ const LoginPage = () => {
       window.dispatchEvent(new Event("userLogin"));
 
       if (data.user.role === "admin") {
-        router.push("/admin");
+        router.push("/admin/product");
       } else {
         router.push("/");
       }
@@ -94,7 +98,9 @@ const LoginPage = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block mb-1 font-medium text-gray-700">Email</label>
+            <label className="block mb-1 font-medium text-gray-700">
+              Email
+            </label>
             <input
               type="email"
               name="email"
@@ -126,6 +132,14 @@ const LoginPage = () => {
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
+          </div>
+          <div>
+            <Link
+              href="/forgot-password"
+              className="text-sm underline hover:text-blue-700 "
+            >
+              Forgot Password ?{" "}
+            </Link>
           </div>
 
           <button

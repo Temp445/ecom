@@ -8,9 +8,11 @@ import {
   Users,
   Package,
   Folder,
-  Settings,
   Menu,
   X,
+  ListTodo,
+  UserStar,
+  NotepadText,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -18,29 +20,30 @@ const Sidebar = () => {
   const pathname = usePathname();
 
   const menuItems = [
-    { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { name: "Users", href: "/admin/users", icon: Users },
     { name: "Products", href: "/admin/product", icon: Package },
     { name: "Categories", href: "/admin/category", icon: Folder },
-    { name: "Orders", href: "/admin/orders", icon: Settings },
-    { name: "Applications", href: "/admin/application", icon: Settings },
+    { name: "Orders", href: "/admin/orders", icon: ListTodo },
+    { name: "Users", href: "/admin/users", icon: Users },
+    { name: "Applications", href: "/admin/application", icon: LayoutDashboard },
+    { name: "Testimonials", href: "/admin/testimonial", icon: UserStar },
+    { name: "blog", href: "/admin/blog", icon: NotepadText },
   ];
 
   return (
     <>
-      <div className="md:hidden fixed top-0 left-0 w-full bg-gray-900 text-white flex items-center justify-between p-4 z-50">
+      <div className="md:hidden h-fit  left-0 w-full bg-gray-900 text-white flex items-center justify-between p-4 z-50 ">
         <h1 className="text-lg font-medium">Admin Panel</h1>
         <button onClick={() => setIsOpen(!isOpen)}>
-          {isOpen ? <X size={22} /> : <Menu size={22} />}
+          {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
       <aside
-        className={`fixed md:sticky top-15 left-0 h-[100vh] w-52 2xl:w-64 bg-gray-900 text-gray-100 z-40 transform transition-transform duration-300 ease-in-out flex flex-col
+        className={`absolute md:sticky md:top-0 left-0 h-full md:h-[100vh] w-64 bg-gray-900 text-gray-100 z-40 transform transition-transform duration-300 ease-in-out
         ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
-          <h2 className="text-lg 2xl:text-xl font-medium">Admin Panel</h2>
+        <div className="hidden md:flex items-center justify-between px-6 py-4 border-b border-gray-800  md:py-6">
+          <h2 className="text-lg 2xl:text-xl  font-medium">Admin Panel</h2>
           <button
             onClick={() => setIsOpen(false)}
             className="md:hidden text-gray-400 hover:text-white"
@@ -76,7 +79,7 @@ const Sidebar = () => {
         </nav>
       </aside>
 
-      <div className="md:hidden h-16" />
+      <div className="md:hidden md:h-16" />
     </>
   );
 };

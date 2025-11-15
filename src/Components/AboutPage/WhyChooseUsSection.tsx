@@ -7,7 +7,6 @@ const WhyChooseUsSection = () => {
     <section className="py-24">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
-          {/* Left Content */}
           <div>
             <h2 className="text-4xl md:text-5xl font-light text-gray-900 leading-tight mb-8">
               Why industry leaders choose us
@@ -16,12 +15,8 @@ const WhyChooseUsSection = () => {
               Three decades of engineering excellence, delivered with precision and trust.
             </p>
             
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-8">
-              <div>
-                <p className="text-3xl font-light text-gray-900">28+</p>
-                <p className="text-sm text-gray-500 mt-1">Years</p>
-              </div>
+            <div className="flex gap-10">
+              
               <div>
                 <p className="text-3xl font-light text-gray-900">500+</p>
                 <p className="text-sm text-gray-500 mt-1">Clients</p>
@@ -33,7 +28,6 @@ const WhyChooseUsSection = () => {
             </div>
           </div>
 
-          {/* Right Content */}
           <div className="space-y-12">
             <div>
               <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-3">

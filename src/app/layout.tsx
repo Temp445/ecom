@@ -6,6 +6,7 @@ import Header from "@/Components/Common/Header";
 import Navbar from "@/Components/Common/Navbar";
 import Toast from "@/Components/Common/Toast";
 import { CartProvider } from "@/context/CartProvider";
+import Footer from "@/Components/Common/Footer";
 
 
 const rubik = Rubik({
@@ -38,8 +39,11 @@ export default function RootLayout({
           <CartProvider>
          <Header/>
         <Navbar/>
+        <div className="min-h-screen">
         {children}
+        </div>
         <Toast/>
+        <Footer/>
         </CartProvider>
         </AuthProvider>
       </body>

@@ -28,14 +28,13 @@ type Order = {
   items: OrderItem[];
 };
 
-export default function OrdersPage() {
+const OrdersPage = () => {
   const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [reviewedProducts, setReviewedProducts] = useState<string[]>([]);
   const router = useRouter();
 
-  // Fetch Orders
   const fetchOrders = async (userId: string) => {
     try {
       setLoading(true);
@@ -48,7 +47,6 @@ export default function OrdersPage() {
     }
   };
 
-  // Fetch Reviewed Products
   const fetchReviewedProducts = async (userId: string, orders: Order[]) => {
     try {
       const reviewed: string[] = [];
@@ -80,12 +78,12 @@ export default function OrdersPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Pending":
       case "Processing":
         return "text-orange-600";
       case "Packed":
       case "Shipped":
         return "text-blue-600";
+      case "Out for Delivery":
       case "Delivered":
         return "text-green-600";
       case "Cancelled":
@@ -99,13 +97,35 @@ export default function OrdersPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center">
-        <Loader2 className="w-10 h-10 text-gray-900 animate-spin" />
+      <div className="min-h-screen bg-gray-50 px-4 py-6 animate-pulse">
+        <div className="max-w-7xl mx-auto">
+          <div className="h-8 w-48 bg-gray-200 rounded mb-6"></div>
+
+          {[1, 2, 3].map((_, index) => (
+            <div key={index} className="bg-white shadow mb-4 rounded">
+              <div className="bg-gray-200 px-6 py-3 flex justify-between items-center rounded-t">
+                <div className="h-3 w-32 bg-gray-300 rounded"></div>
+                <div className="h-3 w-24 bg-gray-300 rounded"></div>
+              </div>
+              <div className="p-6 flex flex-col sm:flex-row gap-4">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 bg-gray-200 rounded"></div>
+                <div className="flex-1 space-y-3">
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </div>
+                <div className="flex flex-col justify-between items-end">
+                  <div className="h-4 w-20 bg-gray-200 rounded"></div>
+                  <div className="h-8 w-28 bg-gray-200 rounded"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
 
-  // Flatten all items from all orders into a single array
   const flattenedItems = orders.flatMap((order) =>
     order.items.map((item) => ({
       ...item,
@@ -136,7 +156,7 @@ export default function OrdersPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <h1 className="text-3xl font-medium text-gray-800 mb-6">My Orders</h1>
+        <h1 className="text-2xl md:text-3xl font-medium text-gray-800 mb-6">My Orders</h1>
 
         <div className="space-y-4">
           {flattenedItems.map((item, index) => {
@@ -144,8 +164,8 @@ export default function OrdersPage() {
             const statusColor = getStatusColor(item.orderStatus);
 
             return (
-              <div key={index} className="bg-white border rounded-lg shadow">
-                <div className="bg-gray-700 text-gray-200 px-6 py-3 flex justify-between items-center">
+              <div key={index} className="bg-white shadow">
+                <div className="bg-gray-700 text-gray-200 px-6 py-3 flex flex-col md:flex-row justify-between md:items-center">
                   <span className="text-xs">
                     Ordered on:{" "}
                     {new Date(item.orderDate).toLocaleDateString("en-IN", {
@@ -157,7 +177,6 @@ export default function OrdersPage() {
                   <span className="text-xs text-gray-400">Order #{item.orderId}</span>
                 </div>
 
-                {/* ✅ link to single product order detail */}
                 <Link
                   href={`/myorders/${item.orderId}/item/${item._id}`}
                   className="block hover:bg-gray-50 transition"
@@ -174,11 +193,11 @@ export default function OrdersPage() {
                         {item.productName}
                       </h3>
                       <p className="text-sm text-gray-600 mb-2">Qty: {item.quantity}</p>
-                      <p className="text-base font-semibold text-gray-800 font-sans">
-                        ₹
+                      <p className="text-sm  text-gray-800 font-sans">
+                       SubTotal ₹
                         {(
-                          (item.discountPriceAtPurchase || item.priceAtPurchase) *
-                          item.quantity
+                          ((item.discountPriceAtPurchase || item.priceAtPurchase) *
+                          item.quantity) + (item.deliveryCharge || 0)
                         ).toLocaleString()}
                       </p>
                     </div>
@@ -224,3 +243,5 @@ export default function OrdersPage() {
     </div>
   );
 }
+
+export default OrdersPage;
