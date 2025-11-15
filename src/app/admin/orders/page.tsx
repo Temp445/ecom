@@ -118,7 +118,7 @@ export default function AdminOrdersPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-6 px-2 md:p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto pb-32">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
             <div>

@@ -181,7 +181,7 @@ const ProductsClient = () => {
 
           <main className="flex-1">
             <div className="flex flex-wrap items-center justify-between mb-6 bg-white border border-slate-200 rounded p-4 shadow-sm">
-              <div className="text-xl font-medium">Our Products</div>
+              <h1 className="text-xl font-medium">Our Products</h1>
 
               <button
                 onClick={() => setShowFilters(true)}

@@ -64,7 +64,6 @@ export default function FiltersSidebar({
         />
       )}
 
-      {/* Sidebar Container */}
       <aside
         className={`fixed lg:static top-0 right-0 z-50 lg:z-auto bg-white lg:bg-transparent
           w-72 max-w-full h-full lg:h-auto shadow-xl lg:shadow-none 
@@ -74,11 +73,10 @@ export default function FiltersSidebar({
       >
         <div className="bg-white lg:bg-transparent h-full lg:h-auto overflow-y-auto flex flex-col p-6 rounded-none lg:rounded-lg border-0 lg:border border-slate-200 shadow-none lg:shadow-sm">
           
-          {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+            <span className="text-lg font-semibold text-slate-800 flex items-center gap-2">
               <Filter size={20} /> Filters
-            </h2>
+            </span>
 
             <div className="flex items-center gap-3">
               <button
@@ -97,12 +95,11 @@ export default function FiltersSidebar({
             </div>
           </div>
 
-          {/* Categories */}
           {uniqueCategories.length > 0 && (
             <div className="mb-8">
-              <h3 className="font-semibold text-slate-800 mb-3 text-sm uppercase tracking-wide">
+              <span className="font-semibold text-slate-800 mb-3 text-sm uppercase tracking-wide">
                 Categories
-              </h3>
+              </span>
               <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
                 {uniqueCategories.map((category) => (
                   <label
@@ -128,11 +125,10 @@ export default function FiltersSidebar({
             </div>
           )}
 
-          {/* Price Range */}
           <div className="mb-8">
-            <h3 className="font-semibold text-slate-800 mb-3 text-sm uppercase tracking-wide">
+            <span className="font-semibold text-slate-800 mb-3 text-sm uppercase tracking-wide">
               Price Range
-            </h3>
+            </span>
             <div className="space-y-3">
               <input
                 type="range"
@@ -152,11 +148,10 @@ export default function FiltersSidebar({
             </div>
           </div>
 
-          {/* Sort By */}
           <div >
-            <h3 className="font-semibold text-slate-800 mb-3 text-sm uppercase tracking-wide">
+            <span className="font-semibold text-slate-800 mb-3 text-sm uppercase tracking-wide">
               Sort By
-            </h3>
+            </span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}

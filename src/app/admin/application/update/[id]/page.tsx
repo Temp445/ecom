@@ -73,7 +73,7 @@ const UpdateApplicationPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6 flex justify-center">
+    <div className="min-h-screen bg-gray-100 p-6 flex justify-center pb-32">
       <form
         onSubmit={handleSubmit}
         className="bg-white p-6 rounded-xl shadow-md w-full max-w-xl"

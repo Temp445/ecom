@@ -56,7 +56,6 @@ const CategoryUploadPage = () => {
       setFormData({ Name: "", CatImage: null });
       setPreview(null);
       router.push("/admin/category");
-
     } catch (error: any) {
       toast.error(
         error.response?.data?.message || "Failed to upload category."
@@ -71,19 +70,10 @@ const CategoryUploadPage = () => {
       <div className="bg-white shadow-2xl rounded-3xl p-8 w-full max-w-lg border border-gray-100">
         <div className="flex items-start justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-semibold text-gray-800 mb-2">
+            <h1 className="text-3xl font-medium text-gray-800 mb-2">
               Upload Category
             </h1>
-            <p className="text-gray-500 text-sm">
-              Add a new category with an image
-            </p>
           </div>
-          <button
-            onClick={() => router.back()}
-            className="flex items-center text-gray-500 hover:text-gray-800 transition"
-          >
-            <ArrowLeft size={20} className="mr-1" /> Back
-          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">

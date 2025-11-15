@@ -72,7 +72,7 @@ const SearchBar = () => {
         </form>
 
         {showResults && (
-          <div className="absolute w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 max-h-[28rem] overflow-y-auto">
+          <div className="absolute  mt-2 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 max-h-[28rem] overflow-y-auto">
             {loading ? (
               <div className="p-8 text-center text-sm text-gray-600">Searching...</div>
             ) : results.length > 0 ? (
@@ -90,7 +90,7 @@ const SearchBar = () => {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
                     {item.price && (
-                      <p className="text-xs text-gray-500">₹{item.price.toLocaleString()}</p>
+                      <p className="text-xs text-gray-600 font-sans">₹{item.price.toLocaleString()}</p>
                     )}
                   </div>
                 </div>
@@ -157,7 +157,7 @@ const SearchBar = () => {
                     <div className="flex-1">
                       <p className="text-sm font-medium text-gray-900">{item.name}</p>
                       {item.price && (
-                        <p className="text-xs text-gray-500 mt-0.5">
+                        <p className="text-xs text-gray-500 mt-0.5 font-sans">
                           ₹{item.price.toLocaleString()}
                         </p>
                       )}

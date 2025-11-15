@@ -39,7 +39,7 @@ const Sidebar = () => {
       </div>
 
       <aside
-        className={`absolute md:sticky md:top-0 left-0 h-full md:h-[100vh] w-64 bg-gray-900 text-gray-100 z-40 transform transition-transform duration-300 ease-in-out
+        className={`absolute md:sticky md:top-0 left-0 h-full md:h-[100vh] w-48 lg:w-64 bg-gray-900 text-gray-100 z-40 transform transition-transform duration-300 ease-in-out
         ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
       >
         <div className="hidden md:flex items-center justify-between px-6 py-4 border-b border-gray-800  md:py-6">

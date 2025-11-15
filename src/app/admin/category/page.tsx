@@ -38,7 +38,7 @@ const CategoryPage = () => {
     if (!confirm("Are you sure you want to delete this category?")) return;
     try {
       setDeletingId(id);
-      await axios.delete(`/api/category/${id}`);
+      await axios.delete(`/api/category/admin/${id}`);
       toast.success("Category deleted successfully!");
       setCategories((prev) => prev.filter((cat) => cat._id !== id));
     } catch (err: any) {
@@ -53,7 +53,7 @@ const CategoryPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 lg:p-8">
+    <div className="min-h-screen bg-white p-4 mb-32 lg:p-8">
       <div className="max-w-7xl mx-auto">
 
         <div className="md:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

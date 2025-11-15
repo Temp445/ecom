@@ -5,7 +5,15 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthProvider";
-import { CreditCard, MapPin, ShoppingCart, User, LockKeyhole ,MoveRight,Loader2 } from "lucide-react";
+import {
+  CreditCard,
+  MapPin,
+  ShoppingCart,
+  User,
+  LockKeyhole,
+  MoveRight,
+  Loader2,
+} from "lucide-react";
 import CheckoutLogin from "./CheckoutAuth";
 import CheckoutAddress from "./CheckoutAddress";
 import OrderSummary from "./OrderSummary";
@@ -86,26 +94,29 @@ const Checkout = () => {
   }, [user]);
 
   const availableCartItems = cartItems.filter(
-  (item) => typeof item.productId === "object" && (item.productId.stock ?? 0) > 0
-);
+    (item) =>
+      typeof item.productId === "object" && (item.productId.stock ?? 0) > 0
+  );
 
+  const totalProductAmount = availableCartItems.reduce((sum, it) => {
+    const product = it.productId;
+    if (!product) return sum;
+    const price =
+      typeof product === "object"
+        ? product.discountPrice || product.price || 0
+        : 0;
+    return sum + price * it.quantity;
+  }, 0);
 
-const totalProductAmount = availableCartItems.reduce((sum, it) => {
-  const product = it.productId;
-  if (!product) return sum;
-  const price =
-    typeof product === "object" ? product.discountPrice || product.price || 0 : 0;
-  return sum + price * it.quantity;
-}, 0);
+  const totalDeliveryCharge = availableCartItems.reduce((sum, item) => {
+    const product = item.productId;
+    if (!product) return sum;
+    return (
+      sum + (typeof product === "object" ? product.deliveryCharge || 0 : 0)
+    );
+  }, 0);
 
-const totalDeliveryCharge = availableCartItems.reduce((sum, item) => {
-  const product = item.productId;
-  if (!product) return sum;
-  return sum + (typeof product === "object" ? product.deliveryCharge || 0 : 0);
-}, 0);
-
-const totalAmount = totalProductAmount + totalDeliveryCharge;
-
+  const totalAmount = totalProductAmount + totalDeliveryCharge;
 
   const goNext = () => {
     if (step === 1 && !user?._id)
@@ -123,7 +134,7 @@ const totalAmount = totalProductAmount + totalDeliveryCharge;
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center gap-3">
-                 <Loader2 className="w-10 h-10 text-gray-900 animate-spin" />
+          <Loader2 className="w-10 h-10 text-gray-900 animate-spin" />
         </div>
       </div>
     );
@@ -219,7 +230,7 @@ const totalAmount = totalProductAmount + totalDeliveryCharge;
                 : "text-slate-900 hover:text-slate-600"
             }`}
           >
-            <MoveRight  className=" h-5 w-5 rotate-180"/> Back
+            <MoveRight className=" h-5 w-5 rotate-180" /> Back
           </button>
 
           {step < 4 && (
@@ -227,7 +238,7 @@ const totalAmount = totalProductAmount + totalDeliveryCharge;
               onClick={goNext}
               className="px-6 py-2.5 bg-emerald-600  rounded flex gap-2 text-white text-sm font-medium transition-colors"
             >
-              Continue <MoveRight  className="w-5 h-5"/>
+              Continue <MoveRight className="w-5 h-5" />
             </button>
           )}
         </div>
@@ -285,7 +296,11 @@ const totalAmount = totalProductAmount + totalDeliveryCharge;
 
                 <div className="flex justify-between items-center font-sans">
                   <span className="text-gray-600 text-sm">Delivery fee</span>
-                   {totalDeliveryCharge > 0 ? (<span> ₹  { totalDeliveryCharge.toLocaleString()} </span> )   : "Free"}
+                  {totalDeliveryCharge > 0 ? (
+                    <span> ₹ {totalDeliveryCharge.toLocaleString()} </span>
+                  ) : (
+                    "Free"
+                  )}
                 </div>
               </div>
 
@@ -300,11 +315,9 @@ const totalAmount = totalProductAmount + totalDeliveryCharge;
                 </div>
               </div>
 
-           
-
               <div className="bg-emerald-50 border border-emerald-500  rounded-lg p-3">
                 <div className="flex items-start gap-2">
-                 <LockKeyhole className="text-emerald-700" />
+                  <LockKeyhole className="text-emerald-700" />
                   <div>
                     <p className="text-sm font-semibold text-emerald-900">
                       Safe & Secure
@@ -321,6 +334,6 @@ const totalAmount = totalProductAmount + totalDeliveryCharge;
       </div>
     </div>
   );
-}
+};
 
 export default Checkout;

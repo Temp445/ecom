@@ -78,7 +78,7 @@ const BlogDetailPage = () => {
           <div className="lg:col-span-1 order-2 lg:order-1">
             <div className="sticky top-24 space-y-8">
               <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                <h3 className="font-bold text-gray-900 mb-4">About This Article</h3>
+                <span className="font-bold text-gray-900 mb-4">About This Article</span>
                 <div className="space-y-4 text-sm">
                   <div className="flex items-start gap-3">
                     <Calendar className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />

@@ -3,12 +3,10 @@ import mongoose from 'mongoose';
 const MONGODB_URI = process.env.DB_URL!;
 const DB_NAME = 'ecom_db';
 
-// Check environment variable
 if (!MONGODB_URI) {
   throw new Error('Please define MONGODB_URI in .env.local');
 }
 
-// Global cache to prevent multiple connections during hot reload in Next.js
 let cached = (global as any).mongoose;
 
 if (!cached) {
@@ -16,12 +14,10 @@ if (!cached) {
 }
 
 const dbConnect = async () => {
-  // Return cached connection if available
   if (cached.conn) {
     return cached.conn;
   }
 
-  // If not connected yet, create a new connection
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,

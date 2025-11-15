@@ -127,7 +127,7 @@ const UpdateBlogPage = () => {
     );
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg border border-gray-200 shadow-md my-14">
       <h1 className="text-2xl font-semibold mb-6">Update Blog</h1>
 
       <form onSubmit={handleSubmit} className="space-y-5">

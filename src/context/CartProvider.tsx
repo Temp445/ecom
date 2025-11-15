@@ -37,7 +37,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setCartCount(guestCart.length);
       }
     } catch (error) {
-      console.error("❌ Error fetching cart count:", error);
+      console.error("Error fetching cart count:", error);
       setCartCount(0);
     }
   };

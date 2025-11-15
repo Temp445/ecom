@@ -173,7 +173,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
     <div className="h-fit py-12 md:px-4 ">
       <div className="mx-auto">
         <div className="mb-12">
-          <h1 className="text-2xl md:text-3xl text-gray-900 mb-2">Customer Reviews</h1>
+          <h2 className="text-2xl md:text-3xl text-gray-900 mb-2">Customer Reviews</h2>
           <p className="text-gray-600">
             {reviews.length} {reviews.length === 1 ? "review" : "reviews"} from
             verified customers

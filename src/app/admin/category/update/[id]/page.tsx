@@ -21,7 +21,7 @@ const CategoryEditPage = () => {
   useEffect(() => {
     const fetchCategory = async () => {
       try {
-        const { data } = await axios.get(`/api/category/${id}`);
+        const { data } = await axios.get(`/api/category/admin/${id}`);
         setFormData({
           Name: data.data.Name,
           CatImage: null,
@@ -67,7 +67,7 @@ const CategoryEditPage = () => {
         data.append("CatImage", formData.CatImage);
       }
 
-      await axios.put(`/api/category/${id}`, data);
+      await axios.put(`/api/category/admin/${id}`, data);
       toast.success("Category updated successfully!");
       router.push("/admin/category");
     } catch (err: any) {
@@ -80,25 +80,20 @@ const CategoryEditPage = () => {
   if (fetching) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <Loader2 className="animate-spin text-gray-400" size={32} />
+        <Loader2 className="animate-spin text-gray-900" size={32} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white/50 py-12 px-4">
-      <div className="bg-white shadow-2xl rounded-3xl p-8 w-full max-w-lg border border-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-white py-12 px-4">
+      <div className="bg-white shadow-2xl rounded-xl p-8 w-full max-w-lg border border-gray-200">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-semibold text-gray-800 mb-1">Edit Category</h1>
-            <p className="text-gray-500 text-sm">Update name or image of the category</p>
+            <h1 className="text-3xl font-medium text-gray-800 mb-1">
+              Edit Category
+            </h1>
           </div>
-          <button
-            onClick={() => router.back()}
-            className="flex items-center text-gray-500 hover:text-gray-800 transition"
-          >
-            <ArrowLeft size={20} className="mr-1" /> Back
-          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -142,7 +137,7 @@ const CategoryEditPage = () => {
                 <img
                   src={preview}
                   alt="Preview"
-                  className="w-full h-48 object-cover"
+                  className="w-full h-48 object-contain"
                 />
                 <div className="absolute inset-0 group-hover:bg-black/30 transition-all duration-200 flex items-center justify-center">
                   <button
@@ -153,7 +148,6 @@ const CategoryEditPage = () => {
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-               
               </div>
             )}
           </div>
@@ -161,17 +155,17 @@ const CategoryEditPage = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-700 text-white py-3.5 rounded-xl flex items-center justify-center transition-all duration-200 font-semibold shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
+            className="w-full bg-emerald-600 text-white py-3.5 rounded-xl flex items-center justify-center transition-all duration-200 font-semibold shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
           >
             {loading ? (
               <>
                 <Loader2 className="animate-spin mr-2 w-5 h-5" />
-                Saving...
+                Updating...
               </>
             ) : (
               <>
                 <Save className="mr-2 w-5 h-5" />
-                Save Changes
+                Update
               </>
             )}
           </button>
