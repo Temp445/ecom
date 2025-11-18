@@ -49,22 +49,6 @@ const OrderDetailPage = () => {
     fetchData();
   }, [orderId, itemId]);
 
-  // const handleStatusUpdate = async (status: string) => {
-  //   try {
-  //     setUpdating(true);
-  //     await axios.patch(`/api/orders/${orderId}/items/${itemId}`, {
-  //       orderStatus: status,
-  //     });
-  //     toast.success(`Status updated to ${status}`);
-  //     router.refresh();
-  //   } catch (error) {
-  //     console.error("Error updating item:", error);
-  //     toast.error("Failed to update status");
-  //   } finally {
-  //     setUpdating(false);
-  //   }
-  // };
-
   const handleCancelItem = async () => {
     if (!cancelReason.trim()) {
       toast.error("Please provide a reason for cancellation.");
@@ -76,9 +60,25 @@ const OrderDetailPage = () => {
       await axios.patch(`/api/orders/${orderId}/items/${itemId}/cancel`, {
         reason: cancelReason,
       });
+
       toast.success("Item cancelled successfully");
       setShowCancel(false);
-      router.refresh();
+      setCancelReason("");
+
+      if (orderId && itemId) {
+        try {
+          const [{ data: refreshedItem }, { data: refreshedOrder }] =
+            await Promise.all([
+              axios.get(`/api/orders/${orderId}/items/${itemId}`),
+              axios.get(`/api/orders/${orderId}`),
+            ]);
+
+          setItemData(refreshedItem);
+          setOrderData(refreshedOrder);
+        } catch (error) {
+          toast.error("Failed to refresh order data");
+        }
+      }
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message?.includes("Shipped") ||
@@ -97,69 +97,66 @@ const OrderDetailPage = () => {
   };
 
   if (loading)
-  return (
-    <div className="min-h-screen bg-gray-100 animate-pulse">
-      <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-        <div className="h-4 bg-gray-300 rounded w-32"></div>
+    return (
+      <div className="min-h-screen bg-gray-100 animate-pulse">
+        <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+          <div className="h-4 bg-gray-300 rounded w-32"></div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm space-y-4">
-          <div className="flex justify-between">
-            <div className="h-5 bg-gray-300 rounded w-32"></div>
-            <div className="h-4 bg-gray-300 rounded w-24"></div>
+          <div className="bg-white p-2 rounded-lg shadow-sm space-y-4">
+            <div className="flex justify-between">
+              <div className="h-5 bg-gray-300 rounded w-32"></div>
+              <div className="h-4 bg-gray-300 rounded w-24"></div>
+            </div>
+            <div className="h-2 bg-gray-200 rounded w-full"></div>
+            <div className="flex justify-between">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex flex-col items-center space-y-2">
+                  <div className="w-10 md:w-16 h-3 bg-gray-300 rounded"></div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="h-2 bg-gray-200 rounded w-full"></div>
-          <div className="flex justify-between">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex flex-col items-center space-y-2">
-                <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
-                <div className="w-10 h-3 bg-gray-300 rounded"></div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-4">
+              <div className="bg-white p-6 rounded-lg shadow-sm flex gap-4">
+                <div className="w-24 h-24 bg-gray-300 rounded"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                  <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-4">
-            <div className="bg-white p-6 rounded-lg shadow-sm flex gap-4">
-              <div className="w-24 h-24 bg-gray-300 rounded"></div>
-              <div className="flex-1 space-y-2">
-                <div className="h-4 bg-gray-300 rounded w-1/2"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+              <div className="bg-white p-6 rounded-lg shadow-sm space-y-3">
                 <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+                <div className="space-y-2">
+                  <div className="h-3 bg-gray-200 rounded w-full"></div>
+                  <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+                  <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                </div>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm space-y-3">
-              <div className="h-4 bg-gray-300 rounded w-1/3"></div>
-              <div className="space-y-2">
-                <div className="h-3 bg-gray-200 rounded w-full"></div>
-                <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+            <div className="space-y-4">
+              <div className="bg-white p-6 rounded-lg shadow-sm space-y-3">
+                <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
                 <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                <div className="border-t border-gray-300 pt-3 space-y-2">
+                  <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <div className="space-y-4">
-            <div className="bg-white p-6 rounded-lg shadow-sm space-y-3">
-              <div className="h-4 bg-gray-300 rounded w-1/3"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-              <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-              <div className="border-t border-gray-300 pt-3 space-y-2">
-                <div className="h-4 bg-gray-300 rounded w-1/2"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+              <div className="flex gap-3">
+                <div className="h-9 bg-gray-300 rounded w-28"></div>
               </div>
-            </div>
-
-            <div className="flex gap-3">
-              <div className="h-9 bg-gray-300 rounded w-28"></div>
-              <div className="h-9 bg-gray-300 rounded w-28"></div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-
+    );
 
   if (!itemData)
     return (
@@ -187,7 +184,10 @@ const OrderDetailPage = () => {
       : "Payment Failed";
 
   const isDisabled =
-   item.orderStatus === "Shipped" || item.orderStatus === "Out for Delivery" || item.orderStatus === "Delivered" || item.orderStatus === "Cancelled";
+    item.orderStatus === "Shipped" ||
+    item.orderStatus === "Out for Delivery" ||
+    item.orderStatus === "Delivered" ||
+    item.orderStatus === "Cancelled";
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -202,94 +202,80 @@ const OrderDetailPage = () => {
 
         <div className="bg-white shadow-sm mb-6 p-2 rounded-lg">
           <div className="flex items-center justify-between mb-4">
-            <h1 className={`text-sm md:text-lg font-semibold`}>{item.orderStatus}</h1>
+            <h1 className={`text-sm md:text-lg font-semibold`}>
+              {item.orderStatus}
+            </h1>
             <p className="text-gray-500 text-sm">
               {item.orderStatus === "Delivered"
-                ? `Delivered ${item.deliveredAt
-                    ? ` on ${new Date(item.deliveredAt).toLocaleDateString()}`
-                    : ""}`
+                ? `Delivered ${
+                    item.deliveredAt
+                      ? ` on ${new Date(item.deliveredAt).toLocaleDateString()}`
+                      : ""
+                  }`
                 : item.orderStatus === "Cancelled"
-                ? `Order cancelled ${item.cancelledAt
-                    ? ` on ${new Date(item.cancelledAt).toLocaleDateString()}`
-                    : ""}`
+                ? `Order cancelled ${
+                    item.cancelledAt
+                      ? ` on ${new Date(item.cancelledAt).toLocaleDateString()}`
+                      : ""
+                  }`
                 : "Order in Progress"}
             </p>
           </div>
 
-          <div className="flex items-center justify-between relative mt-4">
-            <div className="absolute top-2 left-0 right-0 h-0.5 bg-gray-200">
+          <div className="flex flex-col items-center relative mt-4 w-full">
+            <div className="w-full h-1 relative">
               {(() => {
-                const stages = [
-                  "Processing",
-                  "Packed",
-                  "Shipped",
-                  "Out for Delivery",
-                  "Delivered",
-                ];
-                const currentIndex = stages.indexOf(item.orderStatus);
-                const totalStages = stages.length - 1;
+                type OrderStatus =
+                  | "Processing"
+                  | "Packed"
+                  | "Shipped"
+                  | "Out for Delivery"
+                  | "Delivered"
+                  | "Cancelled";
 
-                const progress =
-                  item.orderStatus === "Cancelled"
-                    ? 0.26
-                    : currentIndex >= 0
-                    ? currentIndex / totalStages
-                    : 0;
+                const getStageProgress = (status: OrderStatus) => {
+                  const width = window.innerWidth;
 
-                const bgColor =
+                  const map: Record<OrderStatus, number> = {
+                    Processing: width < 768 ? 8 : width < 1024 ? 5 : 4,
+                    Packed: width < 768 ? 27 : width < 1024 ? 2 : 26,
+                    Shipped: width < 768 ? 46 : width < 1024 ? 47 : 48,
+                    "Out for Delivery":
+                      width < 768 ? 70 : width < 1024 ? 0 : 72,
+                    Delivered: 100,
+                    Cancelled: 100,
+                  };
+
+                  return map[status];
+                };
+
+                const progress = getStageProgress(
+                  item.orderStatus as OrderStatus
+                );
+
+                const barColor =
                   item.orderStatus === "Cancelled"
-                    ? "bg-red-600"
-                    : item.orderStatus === "Delivered"
-                    ? "bg-green-600"
-                    : item.orderStatus === "Out for Delivery"
-                    ? "bg-green-600"
-                    : "bg-green-600";
+                    ? "bg-gradient-to-r from-red-400 to-red-600"
+                    : "bg-gradient-to-r from-green-400 to-green-600";
 
                 return (
-                  <div className="h-0.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-1 md:h-1.5 w-full bg-gray-200 rounded-full overflow-hidden shadow-inner">
                     <div
-                      className={`h-full ${bgColor} transition-all duration-500`}
-                      style={{ width: `${progress * 100}%` }}
+                      className={`h-full ${barColor} transition-all duration-500`}
+                      style={{ width: `${progress}%` }}
                     ></div>
                   </div>
                 );
               })()}
             </div>
 
-            {[
-              "Processing",
-              "Packed",
-              "Shipped",
-              "Out for Delivery",
-              "Delivered",
-            ].map((label, index) => {
-              const orderStages = [
-                "Processing",
-                "Packed",
-                "Shipped",
-                "Out for Delivery",
-                "Delivered",
-              ];
-              const currentStageIndex = orderStages.indexOf(item.orderStatus);
-
-              const isCancelled = item.orderStatus === "Cancelled";
-              const isCompleted = index <= currentStageIndex && !isCancelled;
-
-              return (
-                <div key={index} className="flex flex-col items-center z-10">
-                  <div
-                    className={`w-3 h-3 rounded-full border-2 mt-0.5 ${
-                      isCancelled
-                        ? "border-red-600 bg-red-600"
-                        : isCompleted
-                        ? "border-green-600 bg-green-600"
-                        : "border-gray-300 bg-gray-100"
-                    }`}
-                  ></div>
-                  <span className="text-xs mt-2 text-gray-600">{label}</span>
-                </div>
-              );
-            })}
+            <div className="flex justify-between  w-full mt-1 md:mt-2 text-[10px] sm:text-sm">
+              <span className=" text-center ">Processing</span>
+              <span className=" text-center ">Packed</span>
+              <span className=" text-center ">Shipped</span>
+              <span className=" text-center">Out for Delivery</span>
+              <span className=" text-center ">Delivered</span>
+            </div>
           </div>
         </div>
 
@@ -312,13 +298,13 @@ const OrderDetailPage = () => {
                 </div>
 
                 <div className="flex-1">
-                  <h3 className="text-base font-medium text-gray-900 mb-1">
+                  <h3 className="text-sm md:text-base font-medium text-gray-900 mb-1">
                     {item.productName}
                   </h3>
                   <p className="text-sm text-gray-500 mb-1">
                     Qty: {item.quantity}
                   </p>
-                  <p className="text-base font-semibold text-gray-900 font-sans">
+                  <p className="text-sm md:text-base font-semibold text-gray-900 font-sans">
                     ₹
                     {(item.discountPriceAtPurchase > 0
                       ? item.discountPriceAtPurchase * item.quantity
@@ -419,18 +405,6 @@ const OrderDetailPage = () => {
               >
                 Cancel Item
               </button>
-
-              {/* <button
-                disabled={updating || isDisabled}
-                onClick={() => handleStatusUpdate("Return Requested")}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                  isDisabled
-                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                    : "bg-yellow-500 hover:bg-yellow-600 text-white"
-                }`}
-              >
-                Request Return
-              </button> */}
             </div>
 
             {updating && (
@@ -479,6 +453,6 @@ const OrderDetailPage = () => {
       )}
     </div>
   );
-}
+};
 
 export default OrderDetailPage;

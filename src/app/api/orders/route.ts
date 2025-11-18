@@ -19,7 +19,7 @@ export async function GET(req: Request) {
     }
 
     const orders = await Order.find(query)
-      .populate("userId", "name email") 
+      .populate("userId", "name email")
       .sort({ createdAt: -1 });
 
     return NextResponse.json({ success: true, data: orders }, { status: 200 });
@@ -37,7 +37,17 @@ export async function POST(req: Request) {
     await dbConnect();
     const body = await req.json();
 
-    const { userId, items, shippingAddress, totalAmount, paymentMethod, paymentStatus } = body;
+    const {
+      userId,
+      items,
+      shippingAddress,
+      totalAmount,
+      paymentMethod,
+      paymentStatus,
+      razorpayOrderId,
+      razorpayPaymentId,
+      razorpaySignature,
+    } = body;
 
     if (!userId || !items || items.length === 0 || !shippingAddress || !totalAmount) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -79,9 +89,10 @@ export async function POST(req: Request) {
         productImage: product.thumbnail || "",
         quantity: item.quantity,
         priceAtPurchase: item.priceAtPurchase,
-        discountPriceAtPurchase: item.discountAtPurchase || null,
+        discountPriceAtPurchase: item.discountAtPurchase ?? 0,
         deliveryCharge: item.deliveryChargeAtPurchase ?? 0,
-
+        orderStatus: "Processing",
+        itemPaymentStatus: paymentMethod === "COD" ? "Pending" : "Paid",
       });
     }
 
@@ -99,6 +110,9 @@ export async function POST(req: Request) {
       totalAmount,
       paymentMethod,
       paymentStatus,
+      razorpayOrderId: razorpayOrderId ?? null,
+      razorpayPaymentId: razorpayPaymentId ?? null,
+      razorpaySignature: razorpaySignature ?? null,
     });
 
     return NextResponse.json(
@@ -106,6 +120,7 @@ export async function POST(req: Request) {
       { status: 201 }
     );
   } catch (error: any) {
+    console.error("Error creating order:", error);
     return NextResponse.json(
       { error: error.message || "Failed to create order" },
       { status: 500 }

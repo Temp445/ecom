@@ -21,6 +21,7 @@
     "next": "15.5.4",
     "nodemailer": "^7.0.10",
     "postcode-validator": "^3.10.5",
+    "razorpay": "^2.9.6",
     "react": "19.1.0",
     "react-country-state-city": "^1.1.12",
     "react-dom": "19.1.0",

@@ -297,7 +297,7 @@ const Checkout = () => {
                 <div className="flex justify-between items-center font-sans">
                   <span className="text-gray-600 text-sm">Delivery fee</span>
                   {totalDeliveryCharge > 0 ? (
-                    <span> ₹ {totalDeliveryCharge.toLocaleString()} </span>
+                    <span> ₹{totalDeliveryCharge.toLocaleString()} </span>
                   ) : (
                     "Free"
                   )}

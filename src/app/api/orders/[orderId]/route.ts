@@ -62,7 +62,7 @@ export async function GET(
       totalAmount: order?.totalAmount || 0,
       paymentMethod: order?.paymentMethod || "",
       paymentStatus: order?.paymentStatus || "",
-      transactionId: order?.transactionId || "",
+      paymentId: order?.paymentId || "",
       orderStatus: order?.orderStatus || "",
       orderDate: order?.orderDate || null,
       deliveredAt: order?.deliveredAt || null,
@@ -101,23 +101,44 @@ export async function PATCH(
       cancelledAt,
       returnRequestedAt,
       refundedAt,
+      paymentStatus,
     } = body;
 
-    // Find the order
     const order = await Order.findById(orderId);
     if (!order) {
       return NextResponse.json({ message: "Order not found" }, { status: 404 });
     }
 
-    // Update main order fields
-    if (orderStatus) order.items.forEach((item: { orderStatus: any; }) => (item.orderStatus = orderStatus));
-    if (trackingId) order.items.forEach((item: { trackingId: any; }) => (item.trackingId = trackingId));
-    if (courierPartner) order.items.forEach((item: { courierPartner: any; }) => (item.courierPartner = courierPartner));
-    if (expectedDelivery) order.items.forEach((item: { expectedDelivery: any; }) => (item.expectedDelivery = expectedDelivery));
-    if (deliveredAt) order.items.forEach((item: { deliveredAt: any; }) => (item.deliveredAt = deliveredAt));
-    if (cancelledAt) order.items.forEach((item: { cancelledAt: any; }) => (item.cancelledAt = cancelledAt));
-    if (returnRequestedAt) order.items.forEach((item: { returnRequestedAt: any; }) => (item.returnRequestedAt = returnRequestedAt));
-    if (refundedAt) order.items.forEach((item: { refundedAt: any; }) => (item.refundedAt = refundedAt));
+    if (paymentStatus) {
+      order.paymentStatus = paymentStatus; 
+      order.items.forEach((item: any) => {
+        item.paymentStatus = paymentStatus; 
+      });
+    }
+
+    if (orderStatus)
+      order.items.forEach((item: any) => (item.orderStatus = orderStatus));
+
+    if (trackingId)
+      order.items.forEach((item: any) => (item.trackingId = trackingId));
+
+    if (courierPartner)
+      order.items.forEach((item: any) => (item.courierPartner = courierPartner));
+
+    if (expectedDelivery)
+      order.items.forEach((item: any) => (item.expectedDelivery = expectedDelivery));
+
+    if (deliveredAt)
+      order.items.forEach((item: any) => (item.deliveredAt = deliveredAt));
+
+    if (cancelledAt)
+      order.items.forEach((item: any) => (item.cancelledAt = cancelledAt));
+
+    if (returnRequestedAt)
+      order.items.forEach((item: any) => (item.returnRequestedAt = returnRequestedAt));
+
+    if (refundedAt)
+      order.items.forEach((item: any) => (item.refundedAt = refundedAt));
 
     await order.save();
 
@@ -125,11 +146,11 @@ export async function PATCH(
       { message: "Order updated successfully", order },
       { status: 200 }
     );
-  } catch (error) {
-    console.error("Error updating order:", error);
+  } catch (err: any) {
     return NextResponse.json(
-      { message: "Internal Server Error", error: String(error) },
+      { message: err.message || "Internal server error"},
       { status: 500 }
     );
   }
 }
+

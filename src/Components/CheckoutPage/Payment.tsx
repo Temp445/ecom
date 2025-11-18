@@ -21,7 +21,7 @@ interface PaymentProps {
   paymentMethod: "COD" | "Online";
   setPaymentMethod: (m: "COD" | "Online") => void;
   totalAmount: number;
-  router: ReturnType<typeof useRouter>;
+  router?: ReturnType<typeof useRouter>;
 }
 
 const Payment = ({
@@ -33,69 +33,156 @@ const Payment = ({
   totalAmount,
   router,
 }: PaymentProps) => {
+  const internalRouter = useRouter();
+  const nav = router ?? internalRouter;
+
   const [placingOrder, setPlacingOrder] = useState(false);
+
+  const loadRazorpay = () =>
+    new Promise<boolean>((resolve) => {
+      if (typeof window === "undefined") return resolve(false);
+      if ((window as any).Razorpay) return resolve(true);
+
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+
+  const buildOrderPayload = (
+    paymentStatus: "Paid" | "Pending",
+    razorpayData?: {
+      orderId?: string;
+      paymentId?: string;
+      signature?: string;
+    }
+  ) => {
+    return {
+      userId: user._id,
+      items: cartItems.map((it) => ({
+        productId:
+          typeof it.productId === "string" ? it.productId : it.productId?._id,
+        quantity: Number(it.quantity),
+        priceAtPurchase:
+          typeof it.price === "number"
+            ? it.price
+            : typeof it.productId === "object"
+            ? it.productId.price ?? 0
+            : 0,
+        discountAtPurchase:
+          typeof it.discountPrice === "number"
+            ? it.discountPrice
+            : typeof it.productId === "object"
+            ? it.productId.discountPrice ?? 0
+            : 0,
+        deliveryChargeAtPurchase:
+          typeof it.deliveryCharge === "number"
+            ? it.deliveryCharge
+            : typeof it.productId === "object"
+            ? it.productId.deliveryCharge ?? 0
+            : 0,
+        orderStatus: "Processing",
+        itemPaymentStatus: paymentStatus,
+      })),
+      shippingAddress: selectedAddressId,
+      totalAmount,
+      paymentMethod,
+      paymentStatus,
+      razorpayOrderId: razorpayData?.orderId ?? null,
+      razorpayPaymentId: razorpayData?.paymentId ?? null,
+      razorpaySignature: razorpayData?.signature ?? null,
+    };
+  };
 
   const handlePlaceOrder = async () => {
     if (!user?._id) return toast.error("Please login to continue");
-    if (!selectedAddressId) return toast.error("Please select a delivery address");
+    if (!selectedAddressId)
+      return toast.error("Please select a delivery address");
     if (!cartItems.length) return toast.error("Your cart is empty");
 
     setPlacingOrder(true);
 
     try {
-      const payload = {
-        userId: user._id,
-        items: cartItems.map((it) => ({
-          productId:
-            typeof it.productId === "string"
-              ? it.productId
-              : it.productId?._id,
-          quantity: Number(it.quantity),
-          priceAtPurchase:
-            typeof it.price === "number"
-              ? it.price
-              : typeof it.productId === "object"
-              ? it.productId.price ?? 0
-              : 0,
-          discountAtPurchase:
-            typeof it.discountPrice === "number"
-              ? it.discountPrice
-              : typeof it.productId === "object"
-              ? it.productId.discountPrice ?? null
-              : null,
-          deliveryChargeAtPurchase:
-            typeof it.deliveryCharge === "number"
-              ? it.deliveryCharge
-              : typeof it.productId === "object"
-              ? it.productId.deliveryCharge ?? null
-              : null,
-        })),
-        shippingAddress: selectedAddressId,
-        totalAmount,
-        paymentMethod,
-        paymentStatus: paymentMethod === "Online" ? "Paid" : "Pending",
-        transactionId:
-          paymentMethod === "Online"
-            ? `TXN-${Date.now()}-${Math.floor(Math.random() * 1000)}`
-            : undefined,
-      };
+      if (paymentMethod === "COD") {
+        const payload = buildOrderPayload("Pending");
+        const res = await axios.post("/api/orders", payload);
 
-      const res = await axios.post("/api/orders", payload, {
-        validateStatus: () => true, 
+        if (res.status === 201 && res.data?.success) {
+          toast.success("Order placed (COD)");
+          nav.push("/myorders");
+        } else {
+          toast.error(res.data?.error || "Failed to place order");
+        }
+        setPlacingOrder(false);
+        return;
+      }
+
+      const ok = await loadRazorpay();
+      if (!ok) {
+        toast.error("Failed to load Razorpay SDK");
+        setPlacingOrder(false);
+        return;
+      }
+
+      const createOrderRes = await axios.post("/api/razorpay/order", {
+        amount: totalAmount,
       });
 
-      if (res.status === 201 && res.data?.success) {
-        toast.success("Order placed successfully!");
-        router.push("/myorders"); 
-      } else {
-        const msg =
-          res.data?.error || res.data?.message || "Failed to place order.";
-        toast.error(msg);
-        console.error("Order API Error:", res);
+      if (!createOrderRes.data?.order) {
+        toast.error(createOrderRes.data?.error || "Unable to create payment");
+        setPlacingOrder(false);
+        return;
       }
-    } catch (err: any) {
-      console.error("Network/API error while placing order:", err);
-      toast.error("Failed to communicate with order API. Please try again.");
+
+      const rzpOrder = createOrderRes.data.order;
+
+      const options: any = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: rzpOrder.amount,
+        currency: rzpOrder.currency || "INR",
+        name: "Your Store",
+        description: "Order Payment",
+        order_id: rzpOrder.id,
+        handler: async function (response: any) {
+          try {
+            const orderPayload = buildOrderPayload("Paid", {
+              orderId: rzpOrder.id,
+              paymentId: response.razorpay_payment_id,
+              signature: response.razorpay_signature,
+            });
+
+            const orderRes = await axios.post("/api/orders", orderPayload);
+
+            if (orderRes.data.success) {
+              toast.success("Payment successful! Order placed.");
+              nav.push("/myorders");
+            } else {
+              toast.error("Order failed to create after payment");
+            }
+          } catch (err) {
+            console.error(err);
+            toast.error("Server error while creating order");
+          }
+        },
+        prefill: {
+          name: user?.name || "",
+          email: user?.email || "",
+          contact: user?.mobile || "",
+        },
+        theme: { color: "#10b981" },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+
+      rzp.on("payment.failed", (failure: any) => {
+        console.error("Payment failed:", failure);
+        toast.error("Payment failed. Try another method.");
+      });
+    } catch (err) {
+      console.error(err);
+      toast.error("Payment flow error");
     } finally {
       setPlacingOrder(false);
     }
@@ -127,12 +214,8 @@ const Payment = ({
           <CreditCard className="text-white w-5 h-5" />
         </div>
         <div>
-          <h2 className="text-xl  text-gray-900">
-            Payment Method
-          </h2>
-          <p className="text-sm text-gray-500">
-            Choose how you’d like to pay
-          </p>
+          <h2 className="text-xl text-gray-900">Payment Method</h2>
+          <p className="text-sm text-gray-500">Choose how you’d like to pay</p>
         </div>
       </div>
 
@@ -215,7 +298,7 @@ const Payment = ({
       <button
         onClick={handlePlaceOrder}
         disabled={placingOrder}
-        className={`w-full py-4 rounded-xl text-white text-lg transition-all flex items-center justify-center gap-2 ${
+        className={`w-full py-4 rounded-xl text-white text-lg font-sans transition-all flex items-center justify-center gap-2 ${
           placingOrder
             ? "bg-gray-400 cursor-not-allowed"
             : "bg-emerald-600 hover:bg-emerald-700 shadow-lg hover:shadow-xl"
@@ -224,12 +307,12 @@ const Payment = ({
         {placingOrder ? (
           <>
             <Loader2 className="w-5 h-5 animate-spin" />
-            Processing Order...
+            Processing...
           </>
         ) : paymentMethod === "Online" ? (
           <>
             <Wallet className="w-5 h-5" />
-            Pay ₹{totalAmount.toLocaleString()} & Place Order
+            Pay ₹{totalAmount.toLocaleString()}
           </>
         ) : (
           <>
@@ -240,6 +323,6 @@ const Payment = ({
       </button>
     </section>
   );
-}
+};
 
 export default Payment;

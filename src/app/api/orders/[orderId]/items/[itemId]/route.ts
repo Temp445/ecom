@@ -4,8 +4,8 @@ import Order from "@/models/Order";
 
 
 export async function GET(
-  req: Request ,
-  { params }: { params: Promise <{ orderId: string; itemId: string }> }
+  req: Request,
+  { params }: { params: Promise<{ orderId: string; itemId: string }> }
 ) {
   try {
     await dbConnect();
@@ -20,8 +20,13 @@ export async function GET(
     if (!item)
       return NextResponse.json({ message: "Item not found" }, { status: 404 });
 
-    return NextResponse.json({ item });
-  } catch (err:any) {
+    const fullItem = {
+      ...item.toObject(),
+      razorpayPaymentId: item.razorpayPaymentId || order.razorpayPaymentId,
+    };
+
+    return NextResponse.json({ item: fullItem });
+  } catch (err: any) {
     return NextResponse.json(
       { message: "Server error", error: err.message },
       { status: 500 }
@@ -52,6 +57,7 @@ export async function PATCH(
     const allowedFields = [
       "orderStatus",
       "expectedDelivery",
+      "itemPaymentStatus"
     ];
 
     for (const key of allowedFields) {

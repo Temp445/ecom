@@ -9,7 +9,6 @@ const orderItemSchema = new mongoose.Schema(
     },
     productName: { type: String, required: true },
     productImage: { type: String },
-
     quantity: { type: Number, required: true, min: 1 },
     priceAtPurchase: { type: Number, required: true },
     discountPriceAtPurchase: { type: Number, default: 0 },
@@ -17,18 +16,25 @@ const orderItemSchema = new mongoose.Schema(
 
     orderStatus: {
       type: String,
-      enum: ["Processing","Packed", "Shipped", "Out for Delivery", "Delivered", "Cancelled", "Returned", "Refunded"],
+      enum: ["Processing","Packed", "Shipped", "Out for Delivery", "Delivered", "Cancelled", "Refunded"],
       default: "Processing",
     },
+      itemPaymentStatus: {
+      type: String,
+      enum: ["Paid", "Pending", "Refunded", "Cancelled"],
+      default: "Pending",
+    },
+    razorpayPaymentId: { type: String, default: null },
+    razorpayRefundId: { type: String, default: null },
+    itemRefundAmount: { type: Number, default: 0 },
+    refundedAt: { type: Date },
+
     trackingId: { type: String, default: null },
     courierPartner: { type: String, default: null },
     expectedDelivery: { type: Date },
     deliveredAt: { type: Date },
     cancelledAt: { type: Date },
     cancelReason: { type: String },
-    returnRequested: { type: Boolean, default: false },
-    returnedAt: { type: Date },
-    refundedAt: { type: Date },
   }
 );
 
@@ -64,12 +70,10 @@ const orderSchema = new mongoose.Schema(
       enum: ["Paid", "Pending", "Failed"],
       default: "Pending",
     },
-    transactionId: { type: String },
-
-    orderDate: {
-      type: Date,
-      default: Date.now,
-    }
+    razorpayOrderId: { type: String, default: null },
+    razorpayPaymentId: { type: String, default: null },  
+    razorpaySignature: { type: String, default: null },
+    orderDate: { type: Date, default: Date.now }
   },
   { timestamps: true }
 );
